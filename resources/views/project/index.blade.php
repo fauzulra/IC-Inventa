@@ -11,27 +11,26 @@
             class="bg-[#FFB22C] hover:bg-orange-500 text-white font-medium text-sm py-3 px-4 rounded-md mb-6 flex items-center gap-2 transition duration-200">
             <i class="fas fa-plus"></i> Tambah Proyek
         </button>
-
+        {{-- Show & Search --}}
         <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
             <div class="text-gray-600">
                 Show
-                <select class="border border-gray-300 rounded px-2 py-1 mx-1 focus:outline-none focus:border-orange-400">
+                <select id="showEntries"
+                    class="border border-gray-300 rounded px-2 py-1.5 mx-1 focus:outline-none focus:border-orange-400">
                     <option>10</option>
                     <option>25</option>
                     <option>50</option>
                 </select>
                 entries
             </div>
-
             <div class="relative">
-                <input type="text" placeholder="Cari Proyek"
+                <input type="text" id="searchInput" placeholder="Cari Barang"
                     class="border border-gray-300 rounded pl-3 pr-10 py-1.5 focus:outline-none focus:border-orange-400 w-64">
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
                     <i class="fas fa-search"></i>
                 </div>
             </div>
         </div>
-
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse border border-gray-200">
                 <thead class="bg-gray-50">
