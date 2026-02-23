@@ -46,7 +46,7 @@
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700 text-center">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="text-sm text-gray-600">
+                <tbody id="tableBody" class="text-sm text-gray-600">
                     <tr class="hover:bg-gray-50 transition">
                         <td class="border border-gray-200 px-4 py-1.5 text-center">1</td>
                         <td class="border border-gray-200 px-4 py-1.5">CPV1</td>
@@ -98,18 +98,14 @@
             </table>
         </div>
 
+        {{-- Pagination --}}
         <div class="flex justify-center items-center mt-6 gap-2">
-            <button
+            <button id="prevBtn"
                 class="bg-[#854d3d] hover:bg-[#6b3d31] text-white px-4 py-2 rounded-md font-medium text-sm flex items-center gap-2 transition">
                 <i class="fas fa-arrow-left"></i> Sebelum
             </button>
-            <div class="flex gap-2">
-                <button
-                    class="bg-white border border-gray-300 text-gray-700 w-10 h-10 flex items-center justify-center rounded-md font-bold hover:bg-gray-50">1</button>
-                <button
-                    class="bg-white border border-gray-300 text-gray-700 w-10 h-10 flex items-center justify-center rounded-md font-bold hover:bg-gray-50">2</button>
-            </div>
-            <button
+            <div id="pageNumbers" class="flex gap-2"></div>
+            <button id="nextBtn"
                 class="bg-[#854d3d] hover:bg-[#6b3d31] text-white px-4 py-2 rounded-md font-medium text-sm flex items-center gap-2 transition">
                 Selanjutnya <i class="fas fa-arrow-right"></i>
             </button>
@@ -257,8 +253,8 @@
             toggleModal('modalUpdateStatusProyek');
         }
     </script>
-@endsection
-
 @section('script')
+    @include('layout.script')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+@endsection
 @endsection

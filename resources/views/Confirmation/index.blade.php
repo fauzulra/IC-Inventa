@@ -9,7 +9,8 @@
         <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
             <div class="text-gray-600">
                 Show
-                <select class="border border-gray-300 rounded px-2 py-1.5 mx-1 focus:outline-none focus:border-orange-400">
+                <select id="showEntries"
+                    class="border border-gray-300 rounded px-2 py-1.5 mx-1 focus:outline-none focus:border-orange-400">
                     <option>10</option>
                     <option>25</option>
                     <option>50</option>
@@ -17,7 +18,7 @@
                 entries
             </div>
             <div class="relative">
-                <input type="text" placeholder="Cari Proyek"
+                <input type="text" id="searchInput" placeholder="Cari Barang"
                     class="border border-gray-300 rounded pl-3 pr-10 py-1.5 focus:outline-none focus:border-orange-400 w-64">
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
                     <i class="fas fa-search"></i>
@@ -38,7 +39,7 @@
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700 text-center">Status</th>
                     </tr>
                 </thead>
-                <tbody class="text-sm text-gray-600">
+                <tbody id="tableBody" class="text-sm text-gray-600">
 
                     <tr class="hover:bg-gray-50 transition">
                         <td class="border border-gray-200 px-4 py-3 text-center">1</td>
@@ -86,17 +87,12 @@
         </div>
 
         <div class="flex justify-center items-center mt-6 gap-2">
-            <button
+            <button id="prevBtn"
                 class="bg-[#854d3d] hover:bg-[#6b3d31] text-white px-4 py-2 rounded-md font-medium text-sm flex items-center gap-2 transition">
                 <i class="fas fa-arrow-left"></i> Sebelum
             </button>
-            <div class="flex gap-2">
-                <button
-                    class="bg-white border border-gray-300 text-gray-700 w-10 h-10 flex items-center justify-center rounded-md font-bold hover:bg-gray-50">1</button>
-                <button
-                    class="bg-white border border-gray-300 text-gray-700 w-10 h-10 flex items-center justify-center rounded-md font-bold hover:bg-gray-50">2</button>
-            </div>
-            <button
+            <div id="pageNumbers" class="flex gap-2"></div>
+            <button id="nextBtn"
                 class="bg-[#854d3d] hover:bg-[#6b3d31] text-white px-4 py-2 rounded-md font-medium text-sm flex items-center gap-2 transition">
                 Selanjutnya <i class="fas fa-arrow-right"></i>
             </button>
@@ -199,4 +195,7 @@
             document.getElementById('modalKonfirmasiStatus').classList.add('hidden');
         }
     </script>
+@section('scripts')
+    @include('layout.script')
+@endsection
 @endsection
