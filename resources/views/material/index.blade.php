@@ -49,78 +49,40 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody" class="text-sm text-gray-600">
-                    <tr class="hover:bg-gray-50">
-                        <td class="border border-gray-200 px-4 py-1.5 text-center">1</td>
-                        <td class="border border-gray-200 px-4 py-1.5">Triplek 9mm x 1,2m x 2,4m</td>
-                        <td class="border border-gray-200 px-4 py-1.5"></td>
-                        <td class="border border-gray-200 px-4 py-1.5"></td>
-                        <td class="border border-gray-200 px-4 py-1.5">Taman Niaga Sukses</td>
-                        <td class="border border-gray-200 px-4 py-1.5 text-center">
-                            <div class="flex justify-center gap-2">
-                                <button
-                                    class="text-orange-400 border border-orange-400 hover:bg-orange-50 rounded p-1 w-8 h-8 flex items-center justify-center transition"><i
-                                        class="fas fa-edit"></i></button>
-                                <button
-                                    class="text-red-500 border border-red-500 hover:bg-red-50 rounded p-1 w-8 h-8 flex items-center justify-center transition"><i
-                                        class="fas fa-trash-alt"></i></button>
-                            </div>
-                        </td>
-                    </tr>
+                    @forelse ($materials as $material)
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="border border-gray-200 px-4 py-1.5 text-center">{{ $loop->iteration }}</td>
 
-                    <tr class="hover:bg-gray-50">
-                        <td class="border border-gray-200 px-4 py-1.5 text-center">2</td>
-                        <td class="border border-gray-200 px-4 py-1.5">Semen 40kg</td>
-                        <td class="border border-gray-200 px-4 py-1.5"></td>
-                        <td class="border border-gray-200 px-4 py-1.5"></td>
-                        <td class="border border-gray-200 px-4 py-1.5">Taman Niaga Sukses</td>
-                        <td class="border border-gray-200 px-4 py-1.5 text-center">
-                            <div class="flex justify-center gap-2">
-                                <button
-                                    class="text-orange-400 border border-orange-400 hover:bg-orange-50 rounded p-1 w-8 h-8 flex items-center justify-center transition"><i
-                                        class="fas fa-edit"></i></button>
-                                <button
-                                    class="text-red-500 border border-red-500 hover:bg-red-50 rounded p-1 w-8 h-8 flex items-center justify-center transition"><i
-                                        class="fas fa-trash-alt"></i></button>
-                            </div>
-                        </td>
-                    </tr>
+                            <td class="border border-gray-200 px-4 py-1.5">{{ $material->name }}</td>
 
-                    <tr class="hover:bg-gray-50">
-                        <td class="border border-gray-200 px-4 py-1.5 text-center">3</td>
-                        <td class="border border-gray-200 px-4 py-1.5">Paku Kayu 3"</td>
-                        <td class="border border-gray-200 px-4 py-1.5"></td>
-                        <td class="border border-gray-200 px-4 py-1.5"></td>
-                        <td class="border border-gray-200 px-4 py-1.5">Taman Niaga Sukses</td>
-                        <td class="border border-gray-200 px-4 py-1.5 text-center">
-                            <div class="flex justify-center gap-2">
-                                <button
-                                    class="text-orange-400 border border-orange-400 hover:bg-orange-50 rounded p-1 w-8 h-8 flex items-center justify-center transition"><i
-                                        class="fas fa-edit"></i></button>
-                                <button
-                                    class="text-red-500 border border-red-500 hover:bg-red-50 rounded p-1 w-8 h-8 flex items-center justify-center transition"><i
-                                        class="fas fa-trash-alt"></i></button>
-                            </div>
-                        </td>
-                    </tr>
+                            <td class="border border-gray-200 px-4 py-1.5">{{ $material->stock }}</td>
 
-                    <tr class="hover:bg-gray-50">
-                        <td class="border border-gray-200 px-4 py-1.5 text-center">4</td>
-                        <td class="border border-gray-200 px-4 py-1.5">Paku Kayu 4"</td>
-                        <td class="border border-gray-200 px-4 py-1.5"></td>
-                        <td class="border border-gray-200 px-4 py-1.5"></td>
-                        <td class="border border-gray-200 px-4 py-1.5">Taman Niaga Sukses</td>
-                        <td class="border border-gray-200 px-4 py-1.5 text-center">
-                            <div class="flex justify-center gap-2">
-                                <button
-                                    class="text-orange-400 border border-orange-400 hover:bg-orange-50 rounded p-1 w-8 h-8 flex items-center justify-center transition"><i
-                                        class="fas fa-edit"></i></button>
-                                <button
-                                    class="text-red-500 border border-red-500 hover:bg-red-50 rounded p-1 w-8 h-8 flex items-center justify-center transition"><i
-                                        class="fas fa-trash-alt"></i></button>
-                            </div>
-                        </td>
-                    </tr>
+                            <td class="border border-gray-200 px-4 py-1.5">{{ $material->unit }}</td>
 
+                            <td class="border border-gray-200 px-4 py-1.5">
+                                {{ $material->supplier ? $material->supplier->name : '-' }}
+                            </td>
+
+                            <td class="border border-gray-200 px-4 py-1.5 text-center">
+                                <div class="flex justify-center gap-2">
+                                    <button
+                                        class="text-orange-400 border border-orange-400 hover:bg-orange-50 rounded p-1 w-8 h-8 flex items-center justify-center transition">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button
+                                        class="text-red-500 border border-red-500 hover:bg-red-50 rounded p-1 w-8 h-8 flex items-center justify-center transition">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="border border-gray-200 px-4 py-4 text-center text-gray-500">
+                                Belum ada data material.
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -165,37 +127,41 @@
                 </div>
 
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
-                    <form>
+                    <form action="{{ route('material.store') }}" method="POST">
+                        @csrf
+
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Nama Item / Material</label>
-                            <input type="text" placeholder="Contoh: Triplek 9mm..."
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
+                            <input type="text" name="name" placeholder="Contoh: Triplek 9mm..." required
+                                class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                         </div>
 
                         <div class="flex gap-4 mb-4">
                             <div class="w-1/2">
                                 <label class="block text-gray-700 text-sm font-bold mb-2">Kuantitas Awal</label>
-                                <input type="number" placeholder="0"
+                                <input type="number" name="stock" placeholder="0" required min="0"
                                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                             </div>
+
                             <div class="w-1/2">
                                 <label class="block text-gray-700 text-sm font-bold mb-2">Satuan</label>
-                                <input type="text" placeholder="Pcs / Kg / Lembar"
-                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
+                                <input type="text" name="unit" placeholder="Pcs / Kg / Lembar" required
+                                    class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                             </div>
                         </div>
 
                         <div class="mb-6">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Pemasok (Supplier)</label>
-
                             <div class="relative">
-                                <select
+                                <select name="supplier_id" required
                                     class="shadow appearance-none border rounded w-full py-2 pl-3 pr-10 text-gray-700 leading-normal focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent bg-white">
+
                                     <option value="" disabled selected>Pilih Pemasok...</option>
-                                    <option value="Taman Niaga Sukses">Taman Niaga Sukses</option>
-                                    <option value="Toko Besi Jaya">Toko Besi Jaya</option>
-                                    <option value="Sumber Rejeki">Sumber Rejeki</option>
-                                    <option value="Mitra Abadi">Mitra Abadi</option>
+
+                                    @foreach ($suppliers as $supplier)
+                                        <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
+                                    @endforeach
+
                                 </select>
 
                                 <div
@@ -221,13 +187,14 @@
         </div>
     </div>
 
+@endsection
+
+@section('script')
     <script>
         function toggleModal(modalID) {
             document.getElementById(modalID).classList.toggle("hidden");
         }
     </script>
-@section('script')
     @include('layout.script')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-@endsection
 @endsection

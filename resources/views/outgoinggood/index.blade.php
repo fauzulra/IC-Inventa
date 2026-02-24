@@ -197,12 +197,13 @@
             </div>
         </div>
     </div>
+
+@endsection
+@section('script')
     <script>
         function toggleModal(modalID) {
             document.getElementById(modalID).classList.toggle("hidden");
         }
     </script>
-@section('scripts')
     @include('layout.script')
-@endsection
 @endsection

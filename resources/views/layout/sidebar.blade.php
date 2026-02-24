@@ -119,8 +119,7 @@
     </a>
 </nav>
 <div class="border-gray-200 px-3 pt-4">
-    <a href="#"
-        class="flex items-center mb-1 px-2 py-2 rounded-md hover:bg-gray-50 transition-colors duration-200 group">
+    <a href="#" class="flex items-center mb-1 px-2 py-2 rounded-md {{-- hover:bg-gray-50 transition-colors duration-200 group --}}">
         <div class="shrink-0">
             <img class="h-8 w-8 rounded-full bg-gray-300" src="https://ui-avatars.com/api/?name=Seno+Admin"
                 alt="">

@@ -6,6 +6,8 @@
     <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md border border-gray-200">
 
         <h2 class="text-xl font-semibold text-gray-800 mb-16">Konfirmasi Barang Antar Proyek</h2>
+
+        {{-- Show & Search --}}
         <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
             <div class="text-gray-600">
                 Show
@@ -86,6 +88,7 @@
             </table>
         </div>
 
+        {{-- Pagination --}}
         <div class="flex justify-center items-center mt-6 gap-2">
             <button id="prevBtn"
                 class="bg-[#854d3d] hover:bg-[#6b3d31] text-white px-4 py-2 rounded-md font-medium text-sm flex items-center gap-2 transition">
@@ -183,6 +186,8 @@
         </div>
     </div>
 
+@endsection
+@section('script')
     <script>
         function openStatusModal(itemName) {
             // Isi nama item ke input readonly di modal
@@ -195,7 +200,5 @@
             document.getElementById('modalKonfirmasiStatus').classList.add('hidden');
         }
     </script>
-@section('scripts')
     @include('layout.script')
-@endsection
 @endsection

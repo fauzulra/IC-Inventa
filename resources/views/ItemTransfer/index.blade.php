@@ -14,6 +14,7 @@
             <i class="fas fa-plus"></i> Kirim Barang
         </button>
 
+        {{-- Show & Search --}}
         <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
             <div class="text-gray-600">
                 Show
@@ -48,50 +49,56 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody" class="text-sm text-gray-600">
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="border border-gray-200 px-4 py-3 text-center">1</td>
-                        <td class="border border-gray-200 px-4 py-3">Triplek 9mm x 1,2m x 2,4m</td>
-                        <td class="border border-gray-200 px-4 py-3">10</td>
-                        <td class="border border-gray-200 px-4 py-3">01/02/2024</td>
-                        <td class="border border-gray-200 px-4 py-3">Cipta Land</td>
-                        <td class="border border-gray-200 px-4 py-3 text-center">
-                            <button onclick="openStatusModal('Triplek 9mm x 1,2m x 2,4m')"
-                                class="bg-orange-400 hover:bg-orange-500 text-white px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition transform hover:scale-105 shadow-sm">
-                                Dalam Proses
-                            </button>
-                        </td>
-                    </tr>
+                    @forelse ($transfers as $transfer)
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="border border-gray-200 px-4 py-3 text-center">{{ $loop->iteration }}</td>
 
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="border border-gray-200 px-4 py-3 text-center">2</td>
-                        <td class="border border-gray-200 px-4 py-3">Semen 40kg</td>
-                        <td class="border border-gray-200 px-4 py-3">50</td>
-                        <td class="border border-gray-200 px-4 py-3">02/02/2024</td>
-                        <td class="border border-gray-200 px-4 py-3">Cipta Grand City</td>
-                        <td class="border border-gray-200 px-4 py-3 text-center">
-                            <button onclick="openStatusModal('Semen 40kg')"
-                                class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition transform hover:scale-105 shadow-sm">
-                                Selesai
-                            </button>
-                        </td>
-                    </tr>
+                            <td class="border border-gray-200 px-4 py-3">
+                                {{ $transfer->material ? $transfer->material->name : 'Item Dihapus' }}
+                            </td>
 
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="border border-gray-200 px-4 py-3 text-center">3</td>
-                        <td class="border border-gray-200 px-4 py-3">Paku Kayu 3"</td>
-                        <td class="border border-gray-200 px-4 py-3">20</td>
-                        <td class="border border-gray-200 px-4 py-3">03/02/2024</td>
-                        <td class="border border-gray-200 px-4 py-3">Cipta Residence</td>
-                        <td class="border border-gray-200 px-4 py-3 text-center">
-                            <button onclick="openStatusModal('Paku Kayu 3')"
-                                class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition transform hover:scale-105 shadow-sm">
-                                Selesai
-                            </button>
-                        </td>
-                    </tr>
+                            <td class="border border-gray-200 px-4 py-3">
+                                {{ $transfer->quantity }} {{ $transfer->material ? $transfer->material->unit : '' }}
+                            </td>
+
+                            <td class="border border-gray-200 px-4 py-3">
+                                {{ \Carbon\Carbon::parse($transfer->transfer_date)->format('d/m/Y') }}
+                            </td>
+
+                            <td class="border border-gray-200 px-4 py-3">
+                                {{ $transfer->toProject->name ? $transfer->toProject->name : 'Proyek Tidak Ditemukan' }}
+                            </td>
+
+                            <td class="border border-gray-200 px-4 py-3 text-center">
+                                @if ($transfer->status === 'completed')
+                                    <button onclick="openStatusModal('{{ $transfer->material->name ?? '' }}')"
+                                        class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition transform hover:scale-105 shadow-sm">
+                                        Selesai
+                                    </button>
+                                @elseif ($transfer->status === 'pending')
+                                    <button onclick="openStatusModal('{{ $transfer->material->name ?? '' }}')"
+                                        class="bg-orange-400 hover:bg-orange-500 text-white px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition transform hover:scale-105 shadow-sm">
+                                        Dalam Proses
+                                    </button>
+                                @else
+                                    <button onclick="openStatusModal('{{ $transfer->material->name ?? '' }}')"
+                                        class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition transform hover:scale-105 shadow-sm">
+                                        Ditolak
+                                    </button>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="border border-gray-200 px-4 py-6 text-center text-gray-500">
+                                Belum ada riwayat pengiriman barang.
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
+        {{-- Pagination --}}
         <div class="flex justify-center items-center mt-6 gap-2">
             <button id="prevBtn"
                 class="bg-[#854d3d] hover:bg-[#6b3d31] text-white px-4 py-2 rounded-md font-medium text-sm flex items-center gap-2 transition">
@@ -123,37 +130,19 @@
                     </div>
                 </div>
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
-                    <form>
+                    <form action="{{ route('itemtransfer.store') }}" method="POST">
+                        @csrf
+
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Item yang Dikirim</label>
-                            <input type="text" placeholder="Contoh: Semen 40kg"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
-                        </div>
-                        <div class="flex gap-4 mb-4">
-                            <div class="w-1/2">
-                                <label class="block text-gray-700 text-sm font-bold mb-2">Kuantitas</label>
-                                <input type="number" placeholder="0"
-                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
-                            </div>
-                            <div class="w-1/2">
-                                <label class="block text-gray-700 text-sm font-bold mb-2">Satuan</label>
-                                <input type="text" placeholder="Pcs / Kg"
-                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
-                            </div>
-                        </div>
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal Pengiriman</label>
-                            <input type="date"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
-                        </div>
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Proyek Tujuan</label>
                             <div class="relative">
-                                <select
+                                <select name="material_id" required
                                     class="shadow border rounded w-full py-2 pl-3 pr-10 text-gray-700 leading-normal focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent bg-white appearance-none">
-                                    <option>Pilih Proyek Tujuan...</option>
-                                    <option>Cipta Land</option>
-                                    <option>Cipta Grand City</option>
+                                    <option value="" disabled selected>Pilih Material...</option>
+                                    @foreach ($materials as $material)
+                                        <option value="{{ $material->id }}">{{ $material->name }} (Stok:
+                                            {{ $material->stock }} {{ $material->unit }})</option>
+                                    @endforeach
                                 </select>
                                 <div
                                     class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
@@ -161,12 +150,57 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="flex gap-4 mb-4">
+                            <div class="w-1/2">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Kuantitas</label>
+                                <input type="number" name="quantity" placeholder="0" required min="1"
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
+                            </div>
+                            <div class="w-1/2">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Satuan (Otomatis)</label>
+                                <input type="text" placeholder="Mengikuti Item" disabled
+                                    class="bg-gray-100 shadow appearance-none border rounded w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none cursor-not-allowed">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal Pengiriman</label>
+                            <input type="date" name="transfer_date" required
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Proyek Tujuan</label>
+                            <div class="relative">
+                                <select name="to_project_id" required
+                                    class="shadow border rounded w-full py-2 pl-3 pr-10 text-gray-700 leading-normal focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent bg-white appearance-none">
+
+                                    <option value="" disabled selected>Pilih Proyek Tujuan...</option>
+
+                                    @foreach ($projects as $project)
+                                        <option value="{{ $project->id }}">
+                                            {{ $project->code }} - {{ $project->name }}
+                                        </option>
+                                    @endforeach
+
+                                </select>
+                                <div
+                                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
+                                    <i class="fas fa-chevron-down text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="flex flex-row-reverse">
                             <button type="submit"
-                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#FFB22C] text-base font-medium text-white hover:bg-orange-500 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Kirim
-                                Barang</button>
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#FFB22C] text-base font-medium text-white hover:bg-orange-500 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                                Kirim Barang
+                            </button>
                             <button type="button" onclick="toggleModal('modalTransferBarang')"
-                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                Batal
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -253,6 +287,9 @@
         </div>
     </div>
 
+@endsection
+
+@section('script')
     <script>
         // Fungsi Generic Toggle Modal
         function toggleModal(modalID) {
@@ -267,7 +304,5 @@
             toggleModal('modalUpdateStatus');
         }
     </script>
-@section('scripts')
     @include('layout.script')
-@endsection
 @endsection

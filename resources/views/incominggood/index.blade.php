@@ -14,19 +14,20 @@
             <i class="fas fa-plus"></i> Tambah Barang Masuk
         </button>
 
+        {{-- Show & Search --}}
         <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
             <div class="text-gray-600">
                 Show
-                <select class="border border-gray-300 rounded px-2 py-1.5 mx-1 focus:outline-none focus:border-orange-400">
+                <select id="showEntries"
+                    class="border border-gray-300 rounded px-2 py-1.5 mx-1 focus:outline-none focus:border-orange-400">
                     <option>10</option>
                     <option>25</option>
                     <option>50</option>
                 </select>
                 entries
             </div>
-
             <div class="relative">
-                <input type="text" placeholder="Cari Barang"
+                <input type="text" id="searchInput" placeholder="Cari Barang"
                     class="border border-gray-300 rounded pl-3 pr-10 py-1.5 focus:outline-none focus:border-orange-400 w-64">
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
                     <i class="fas fa-search"></i>
@@ -99,6 +100,7 @@
                 </tbody>
             </table>
         </div>
+        {{-- Pagination --}}
         <div class="flex justify-center items-center mt-6 gap-2">
             <button id="prevBtn"
                 class="bg-[#854d3d] hover:bg-[#6b3d31] text-white px-4 py-2 rounded-md font-medium text-sm flex items-center gap-2 transition">
@@ -197,12 +199,14 @@
             </div>
         </div>
     </div>
+
+@endsection
+
+@section('script')
     <script>
         function toggleModal(modalID) {
             document.getElementById(modalID).classList.toggle("hidden");
         }
     </script>
-@section('scripts')
     @include('layout.script')
-@endsection
 @endsection

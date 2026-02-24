@@ -48,70 +48,36 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody" class="text-sm text-gray-600">
-                    <tr class="hover:bg-gray-50">
-                        <td class="border border-gray-200 px-4 py-1 text-center">1</td>
-                        <td class="border border-gray-200 px-4 py-1">Taman Niaga Sukses</td>
-                        <td class="border border-gray-200 px-4 py-1">Lorem ipsum dolor sit amet consectetur adipisicing
-                            elit. Ullam, nemo!</td>
-                        <td class="border border-gray-200 px-4 py-1 text-center">
-                            <div class="flex justify-center gap-2">
-                                <button
-                                    class="text-orange-400 border border-orange-400 hover:bg-orange-50 rounded p-1 w-8 h-8 flex items-center justify-center transition"><i
-                                        class="fas fa-edit"></i></button>
-                                <button
-                                    class="text-red-500 border border-red-500 hover:bg-red-50 rounded p-1 w-8 h-8 flex items-center justify-center transition"><i
-                                        class="fas fa-trash-alt"></i></button>
-                            </div>
-                        </td>
-                    </tr>
+                    @forelse ($suppliers as $supplier)
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="border border-gray-200 px-4 py-1.5 text-center">{{ $loop->iteration }}</td>
 
-                    <tr class="hover:bg-gray-50">
-                        <td class="border border-gray-200 px-4 py-1 text-center">2</td>
-                        <td class="border border-gray-200 px-4 py-1">TCF Batako</td>
-                        <td class="border border-gray-200 px-4 py-1"></td>
-                        <td class="border border-gray-200 px-4 py-1 text-center">
-                            <div class="flex justify-center gap-2">
-                                <button
-                                    class="text-orange-400 border border-orange-400 hover:bg-orange-50 rounded p-1 w-8 h-8 flex items-center justify-center transition"><i
-                                        class="fas fa-edit"></i></button>
-                                <button
-                                    class="text-red-500 border border-red-500 hover:bg-red-50 rounded p-1 w-8 h-8 flex items-center justify-center transition"><i
-                                        class="fas fa-trash-alt"></i></button>
-                            </div>
-                        </td>
-                    </tr>
+                            <td class="border border-gray-200 px-4 py-1.5">{{ $supplier->name }}</td>
 
-                    <tr class="hover:bg-gray-50">
-                        <td class="border border-gray-200 px-4 py-1 text-center">3</td>
-                        <td class="border border-gray-200 px-4 py-1">Fajar Abadi</td>
-                        <td class="border border-gray-200 px-4 py-1"></td>
-                        <td class="border border-gray-200 px-4 py-1 text-center">
-                            <div class="flex justify-center gap-2">
-                                <button
-                                    class="text-orange-400 border border-orange-400 hover:bg-orange-50 rounded p-1 w-8 h-8 flex items-center justify-center transition"><i
-                                        class="fas fa-edit"></i></button>
-                                <button
-                                    class="text-red-500 border border-red-500 hover:bg-red-50 rounded p-1 w-8 h-8 flex items-center justify-center transition"><i
-                                        class="fas fa-trash-alt"></i></button>
-                            </div>
-                        </td>
-                    </tr>
+                            <td class="border border-gray-200 px-4 py-1.5">
+                                {{ $supplier->description ?? '-' }}
+                            </td>
 
-                    <tr class="hover:bg-gray-50">
-                        <td class="border border-gray-200 px-4 py-1 text-center">4</td>
-                        <td class="border border-gray-200 px-4 py-1">Karya Makmur Raya</td>
-                        <td class="border border-gray-200 px-4 py-1"></td>
-                        <td class="border border-gray-200 px-4 py-1 text-center">
-                            <div class="flex justify-center gap-2">
-                                <button
-                                    class="text-orange-400 border border-orange-400 hover:bg-orange-50 rounded p-1 w-8 h-8 flex items-center justify-center transition"><i
-                                        class="fas fa-edit"></i></button>
-                                <button
-                                    class="text-red-500 border border-red-500 hover:bg-red-50 rounded p-1 w-8 h-8 flex items-center justify-center transition"><i
-                                        class="fas fa-trash-alt"></i></button>
-                            </div>
-                        </td>
-                    </tr>
+                            <td class="border border-gray-200 px-4 py-1.5 text-center">
+                                <div class="flex justify-center gap-2">
+                                    <button
+                                        class="text-orange-400 border border-orange-400 hover:bg-orange-50 rounded p-1 w-8 h-8 flex items-center justify-center transition">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button
+                                        class="text-red-500 border border-red-500 hover:bg-red-50 rounded p-1 w-8 h-8 flex items-center justify-center transition">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="border border-gray-200 px-4 py-4 text-center text-gray-500">
+                                Belum ada data pemasok.
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -153,29 +119,31 @@
                 </div>
 
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
-                    <form>
+                    <form action="{{ route('supplier.store') }}" method="POST">
+                        @csrf
+
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Nama Pemasok</label>
-                            <input type="text" placeholder="Contoh: PT. Sumber Rejeki"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
+                            <input type="text" name="name" placeholder="Contoh: PT. Sumber Rejeki" required
+                                class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                         </div>
 
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Deskripsi</label>
-                            <input type="text" placeholder="Contoh: Suplier Pasir & Semen"
+                            <input type="text" name="description" placeholder="Contoh: Suplier Pasir & Semen"
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                         </div>
 
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">No. Telepon</label>
-                            <input type="text" placeholder="Contoh: 0812-3456-7890"
+                            <input type="text" name="phone" placeholder="Contoh: 0812-3456-7890"
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                         </div>
 
                         <div class="mb-6">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Alamat</label>
-                            <textarea rows="3" placeholder="Masukkan alamat lengkap disini..."
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent"></textarea>
+                            <textarea name="address" rows="3" placeholder="Masukkan alamat lengkap disini..."
+                                class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent"></textarea>
                         </div>
 
                         <div class="flex flex-row-reverse">
@@ -194,13 +162,13 @@
         </div>
     </div>
 
+@endsection
+@section('script')
     <script>
         function toggleModal(modalID) {
             document.getElementById(modalID).classList.toggle("hidden");
         }
     </script>
-@endsection
-@section('script')
     @include('layout.script')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 @endsection

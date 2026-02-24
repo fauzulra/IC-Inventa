@@ -17,17 +17,20 @@ route::get('/',[LoginController::class,'index'])->name('login.index');
 route::get('/dashboard',[DashboardController::class,'index'])->name('dashboard');
 
 Route::get('/project', [ProjectController::class, 'index'])->name('project.index');
+Route::post('/project', [ProjectController::class, 'store'])->name('project.store');
 
 Route::get('/material',[MaterialController::class,'index'])->name('material.index');
+Route::post('/material', [MaterialController::class, 'store'])->name('material.store');
 
 route::get('/supplier',[SupplierController::class,'index'])->name('supplier.index');
+Route::post('/pemasok', [SupplierController::class, 'store'])->name('supplier.store');
 
 route::get('/incominggoods',[IncomingGoodController::class,'index'])->name('incominggood.index');
 
 route::get('/outgoinggood',[OutgoingGoodController::class,'index'])->name('outgoinggood.index');
 
 route::get('/itemtransfer',[ItemTransferController::class,'index'])->name('itemtransfer.index');
-
+Route::post('/itemtransfer', [ItemTransferController::class, 'store'])->name('itemtransfer.store');
 route::get('/order',[OrderController::class,'index'])->name('order.index');
 
 route::get('/confirmation', [ConfirmationController::class, 'index'])->name('confirmation.index');

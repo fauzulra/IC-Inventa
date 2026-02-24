@@ -12,7 +12,8 @@ class SupplierController extends Controller
      */
     public function index()
     {
-        return view('supplier.index');
+        $suppliers = Supplier::latest()->get();
+        return view('supplier.index', compact('suppliers'));
     }
 
     /**
@@ -28,7 +29,24 @@ class SupplierController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // 1. Validasi Input (Description, phone, address dibuat nullable sesuai schema)
+        $request->validate([
+            'name'        => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'phone'       => 'nullable|string|max:50',
+            'address'     => 'nullable|string',
+        ]);
+
+        // 2. Simpan ke Database
+        Supplier::create([
+            'name'        => ucwords(strtolower($request->name)), // Otomatis Huruf Kapital
+            'description' => ucfirst($request->description),
+            'phone'       => $request->phone,
+            'address'     => ucwords(strtolower($request->address)),
+        ]);
+
+        // 3. Redirect kembali
+        return redirect()->back()->with('success', 'Data Pemasok berhasil ditambahkan!');
     }
 
     /**
