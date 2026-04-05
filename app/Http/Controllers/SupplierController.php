@@ -16,17 +16,6 @@ class SupplierController extends Controller
         return view('supplier.index', compact('suppliers'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         // 1. Validasi Input (Description, phone, address dibuat nullable sesuai schema)
@@ -50,34 +39,42 @@ class SupplierController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(Supplier $supplier)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Supplier $supplier)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Supplier $supplier)
+    public function update(Request $request, $id)
     {
-        //
+        // 1. Validasi Input
+        $request->validate([
+            'name'        => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'phone'       => 'nullable|string|max:50',
+            'address'     => 'nullable|string',
+        ]);
+
+        // 2. Cari Data di Database
+        $supplier = Supplier::findOrFail($id);
+
+        // 3. Lakukan Update Data
+        $supplier->update([
+            'name'        => ucwords(strtolower($request->name)),
+            'description' => ucfirst($request->description),
+            'phone'       => $request->phone,
+            'address'     => ucwords(strtolower($request->address)),
+        ]);
+
+        // 4. Redirect kembali dengan pesan sukses
+        return redirect()->back()->with('success', 'Data Pemasok berhasil diperbarui!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Supplier $supplier)
+    public function destroy($id)
     {
-        //
+        // 1. Cari Data di Database
+        $supplier = Supplier::findOrFail($id);
+
+        // 2. Hapus Data
+        $supplier->delete();
+
+        // 3. Redirect kembali dengan pesan sukses
+        return redirect()->back()->with('success', 'Data Pemasok berhasil dihapus!');
     }
 }

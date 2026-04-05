@@ -71,11 +71,15 @@
 
                             <td class="border border-gray-200 px-4 py-1.5 text-center">
                                 <div class="flex justify-center gap-2">
+                                    {{-- Tombol Edit --}}
                                     <button
+                                        onclick="openEditModal('{{ $project->id }}', '{{ $project->name }}', '{{ $project->location }}', '{{ $project->logistics_contact }}')"
                                         class="text-orange-400 border border-orange-400 hover:bg-orange-50 rounded p-1 w-8 h-8 flex items-center justify-center transition">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button
+
+                                    {{-- Tombol Delete --}}
+                                    <button onclick="openDeleteModal('{{ $project->id }}')"
                                         class="text-red-500 border border-red-500 hover:bg-red-50 rounded p-1 w-8 h-8 flex items-center justify-center transition">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
@@ -107,6 +111,7 @@
         </div>
     </div>
 
+    {{-- Modal Tambah Proyek --}}
     <div id="modalTambahProyek" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title"
         role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -168,7 +173,7 @@
             </div>
         </div>
     </div>
-
+    {{-- Modal Update Status Proyek --}}
     <div id="modalUpdateStatusProyek" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title"
         role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -238,6 +243,96 @@
             </div>
         </div>
     </div>
+    {{-- MODAL EDIT PROYEK --}}
+    <div id="modalEditProyek" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title"
+        role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div onclick="toggleModal('modalEditProyek')"
+                class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-100">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg leading-6 font-bold text-gray-900">Edit Data Proyek</h3>
+                        <button onclick="toggleModal('modalEditProyek')"
+                            class="text-gray-400 hover:text-gray-500 focus:outline-none">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+                    <form id="editProjectForm" method="POST">
+                        @csrf
+                        @method('PUT') <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Nama Proyek</label>
+                            <input type="text" id="edit_name" name="name" required
+                                class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Lokasi</label>
+                            <input type="text" id="edit_location" name="location" required
+                                class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Logistik (Nama & Kontak)</label>
+                            <div class="relative">
+                                <select id="edit_logistics_contact" name="logistics_contact" required
+                                    class="shadow appearance-none border rounded w-full py-2 pl-3 pr-10 text-gray-700 leading-normal focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent bg-white">
+                                    <option value="" disabled>Pilih Logistik...</option>
+                                    <option value="Seno – 0813 6421 9203">Seno – 0813 6421 9203</option>
+                                    <option value="Ryan Sinaga – 0858 3735 0411">Ryan Sinaga – 0858 3735 0411</option>
+                                    <option value="Dhuha – 0895 6036 81241">Dhuha – 0895 6036 81241</option>
+                                    <option value="Retno Diaz – 0813 6411 9665">Retno Diaz – 0813 6411 9665</option>
+                                </select>
+                                <div
+                                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
+                                    <i class="fas fa-chevron-down text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-row-reverse">
+                            <button type="submit"
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#FFB22C] text-base font-medium text-white hover:bg-orange-500 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Update</button>
+                            <button type="button" onclick="toggleModal('modalEditProyek')"
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{-- MODAL DELETE PROYEK --}}
+    <div id="modalDeleteProyek" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title"
+        role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div onclick="toggleModal('modalDeleteProyek')"
+                class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-100">
+                    <h3 class="text-lg leading-6 font-bold text-gray-900">Konfirmasi Hapus</h3>
+                </div>
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+                    <p class="text-sm text-gray-500 mb-4">Apakah Anda yakin ingin menghapus data proyek ini? Tindakan ini
+                        tidak dapat dibatalkan.</p>
+                    <form id="deleteProjectForm" method="POST">
+                        @csrf
+                        @method('DELETE') <div class="flex flex-row-reverse">
+                            <button type="submit"
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Hapus</button>
+                            <button type="button" onclick="toggleModal('modalDeleteProyek')"
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -252,6 +347,30 @@
         function openStatusModal(proyekName) {
             document.getElementById('statusProyekName').value = proyekName;
             toggleModal('modalUpdateStatusProyek');
+        }
+
+        // Fungsi untuk membuka Modal Edit dan mengisi nilainya
+        function openEditModal(id, name, location, contact) {
+            // Setup URL form action
+            let form = document.getElementById('editProjectForm');
+            form.action = `/project/${id}`; // Sesuaikan path routing jika berbeda
+
+            // Isi value ke input
+            document.getElementById('edit_name').value = name;
+            document.getElementById('edit_location').value = location;
+            document.getElementById('edit_logistics_contact').value = contact;
+
+            // Buka Modal
+            toggleModal('modalEditProyek');
+        }
+
+        // Fungsi untuk membuka Modal Delete
+        function openDeleteModal(id) {
+            let form = document.getElementById('deleteProjectForm');
+            form.action = `/project/${id}`; // Sesuaikan path routing jika berbeda
+
+            // Buka Modal
+            toggleModal('modalDeleteProyek');
         }
     </script>
 

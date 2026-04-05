@@ -23,4 +23,9 @@ class Project extends Model
         return $this->hasMany(Order::class);
     }
 
+    public function outgoingGoods()
+    {
+        return $this->hasMany(OutgoingGood::class);
+    }
+
 }

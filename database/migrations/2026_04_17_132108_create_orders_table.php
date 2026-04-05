@@ -11,12 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('outgoing_goods', function (Blueprint $table) {
+        Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('material_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users');
+            $table->string('name');
+            $table->foreignId('project_id')->constrained(); 
             $table->integer('quantity');
-            $table->date('date_shipped'); 
-            $table->string('destination')->nullable(); 
+            $table->integer('unit');
+            $table->date('request_date');
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->timestamps();
         });
     }
@@ -26,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('outgoing_goods');
+        Schema::dropIfExists('orders');
     }
 };

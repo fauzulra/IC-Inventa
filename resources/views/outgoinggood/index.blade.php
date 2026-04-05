@@ -41,60 +41,42 @@
                         </th>
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Item</th>
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Kuantitas</th>
-                        <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Tangal Keluar</th>
-                        <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Pemasok</th>
+                        <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Tanggal Keluar</th>
+                        <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Proyek</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody" class="text-sm text-gray-600">
-                    <tr class="hover:bg-gray-50">
-                        <td class="border border-gray-200 px-4 py-4 text-center">1</td>
-                        <td class="border border-gray-200 px-4 py-4">Triplek 9mm x 1,2m x 2,4m</td>
-                        <td class="border border-gray-200 px-4 py-4"></td>
-                        <td class="border border-gray-200 px-4 py-4"></td>
-                        <td class="border border-gray-200 px-4 py-4">Taman Niaga Sukses</td>
-                    </tr>
+                    @forelse ($outgoingGoods as $outgoing)
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="border border-gray-200 px-4 py-4 text-center">{{ $loop->iteration }}</td>
 
-                    <tr class="hover:bg-gray-50">
-                        <td class="border border-gray-200 px-4 py-4 text-center">2</td>
-                        <td class="border border-gray-200 px-4 py-4">Semen 40kg</td>
-                        <td class="border border-gray-200 px-4 py-4"></td>
-                        <td class="border border-gray-200 px-4 py-4"></td>
-                        <td class="border border-gray-200 px-4 py-4">Taman Niaga Sukses</td>
-                    </tr>
+                            <td class="border border-gray-200 px-4 py-4">
+                                {{ $outgoing->material ? $outgoing->material->name : 'Item Dihapus' }}
+                            </td>
 
-                    <tr class="hover:bg-gray-50">
-                        <td class="border border-gray-200 px-4 py-4 text-center">3</td>
-                        <td class="border border-gray-200 px-4 py-4">Paku Kayu 3"</td>
-                        <td class="border border-gray-200 px-4 py-4"></td>
-                        <td class="border border-gray-200 px-4 py-4"></td>
-                        <td class="border border-gray-200 px-4 py-4">Taman Niaga Sukses</td>
-                    </tr>
+                            <td class="border border-gray-200 px-4 py-4">
+                                {{ $outgoing->quantity }} {{ $outgoing->material ? $outgoing->material->unit : '' }}
+                            </td>
 
-                    <tr class="hover:bg-gray-50">
-                        <td class="border border-gray-200 px-4 py-4 text-center">4</td>
-                        <td class="border border-gray-200 px-4 py-4">Paku Kayu 4"</td>
-                        <td class="border border-gray-200 px-4 py-4"></td>
-                        <td class="border border-gray-200 px-4 py-4"></td>
-                        <td class="border border-gray-200 px-4 py-4">Taman Niaga Sukses</td>
-                    </tr>
+                            <td class="border border-gray-200 px-4 py-4">
+                                {{ date('d/m/Y', strtotime($outgoing->date_shipped)) }}
+                            </td>
 
-                    <tr class="hover:bg-gray-50">
-                        <td class="border border-gray-200 px-4 py-4 text-center">5</td>
-                        <td class="border border-gray-200 px-4 py-4">Paku Kayu 1 1/2"</td>
-                        <td class="border border-gray-200 px-4 py-4"></td>
-                        <td class="border border-gray-200 px-4 py-4"></td>
-                        <td class="border border-gray-200 px-4 py-4">Taman Niaga Sukses</td>
-                    </tr>
-
-                    <tr class="hover:bg-gray-50">
-                        <td class="border border-gray-200 px-4 py-4 text-center">6</td>
-                        <td class="border border-gray-200 px-4 py-4">Paku Rivet 4mm, tinggi kepala 1cm (1 box = 500pcs)
-                        </td>
-                        <td class="border border-gray-200 px-4 py-4"></td>
-                        <td class="border border-gray-200 px-4 py-4"></td>
-                        <td class="border border-gray-200 px-4 py-4">Taman Niaga Sukses</td>
-                    </tr>
-
+                            <td class="border border-gray-200 px-4 py-4">
+                                @if ($outgoing->project)
+                                    {{ $outgoing->project->code }} - {{ $outgoing->project->name }}
+                                @else
+                                    <span class="text-gray-400 italic">Tanpa Proyek</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="border border-gray-200 px-4 py-6 text-center text-gray-500">
+                                Belum ada data barang keluar.
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -136,45 +118,58 @@
                 </div>
 
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
-                    <form>
+                    <form action="{{ route('outgoinggood.store') }}" method="POST">
+                        @csrf
+
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Item</label>
-                            <input type="text" placeholder="Contoh: Semen 40kg"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
+                            <div class="relative">
+                                <select name="material_id" required
+                                    class="shadow appearance-none border rounded w-full py-2 pl-3 pr-10 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent bg-white">
+                                    <option value="" disabled selected>Pilih Item / Material...</option>
+                                    @foreach ($materials as $material)
+                                        <option value="{{ $material->id }}">{{ $material->name }} (Stok:
+                                            {{ $material->stock }} {{ $material->unit }})</option>
+                                    @endforeach
+                                </select>
+                                <div
+                                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
+                                    <i class="fas fa-chevron-down text-xs"></i>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="flex gap-4 mb-4">
                             <div class="w-1/2">
                                 <label class="block text-gray-700 text-sm font-bold mb-2">Kuantitas</label>
-                                <input type="number" placeholder="0"
+                                <input type="number" name="quantity" placeholder="0" required min="1"
                                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                             </div>
+
                             <div class="w-1/2">
                                 <label class="block text-gray-700 text-sm font-bold mb-2">Satuan</label>
-                                <input type="text" placeholder="Pcs / Kg"
-                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
+                                <input type="text" placeholder="Mengikuti Item" disabled
+                                    class="bg-gray-100 shadow appearance-none border rounded w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none cursor-not-allowed">
                             </div>
                         </div>
 
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal Keluar</label>
-                            <input type="date"
+                            <input type="date" name="date_shipped" required
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                         </div>
 
                         <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Pemasok</label>
-
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Proyek Tujuan</label>
                             <div class="relative">
-                                <select
+                                <select name="project_id" required
                                     class="shadow appearance-none border rounded w-full py-2 pl-3 pr-10 text-gray-700 leading-normal focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent bg-white">
-                                    <option value="" disabled selected>Pilih Pemasok...</option>
-                                    <option value="Taman Niaga Sukses">Taman Niaga Sukses</option>
-                                    <option value="Toko Besi Jaya">Toko Besi Jaya</option>
-                                    <option value="Sumber Rejeki">Sumber Rejeki</option>
-                                    <option value="Mitra Abadi">Mitra Abadi</option>
+                                    <option value="" disabled selected>Pilih Proyek Tujuan...</option>
+                                    @foreach ($projects as $project)
+                                        <option value="{{ $project->id }}">{{ $project->code }} - {{ $project->name }}
+                                        </option>
+                                    @endforeach
                                 </select>
-
                                 <div
                                     class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
                                     <i class="fas fa-chevron-down text-xs"></i>

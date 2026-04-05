@@ -43,36 +43,37 @@ class MaterialController extends Controller
         // 3. Redirect kembali
         return redirect()->back()->with('success', 'Data Material berhasil ditambahkan!');
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Material $material)
+    public function update(Request $request, $id)
     {
-        //
+        // 1. Validasi Input
+        $request->validate([
+            'name'        => 'required|string|max:255',
+            'stock'       => 'required|integer|min:0',
+            'unit'        => 'required|string|max:50',
+            'supplier_id' => 'required|integer|exists:suppliers,id',
+        ]);
+
+        // 2. CARI DATA DI DATABASE DULU (Ini yang sebelumnya terlewat)
+        $material = Material::findOrFail($id);
+
+        // 3. Baru lakukan update pada data yang sudah ditemukan
+        $material->update([
+            'name'        => ucwords(strtolower($request->name)),
+            'unit'        => ucwords(strtolower($request->unit)),
+            'stock'       => $request->stock,
+            'supplier_id' => $request->supplier_id,
+        ]);
+
+        // 4. Redirect kembali dengan pesan sukses
+        return redirect()->back()->with('success', 'Data Material berhasil diperbarui!');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Material $material)
+    public function destroy(Material $id)
     {
-        //
-    }
+        // 1. Hapus Data Material
+        $id->delete();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Material $material)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Material $material)
-    {
-        //
+        // 2. Redirect kembali
+        return redirect()->back()->with('success', 'Data Material berhasil dihapus!');
     }
 }

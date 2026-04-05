@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('confirmations', function (Blueprint $table) {
+        Schema::create('outgoing_goods', function (Blueprint $table) {
             $table->id();
             $table->foreignId('material_id')->constrained()->onDelete('cascade');
             $table->integer('quantity');
-            $table->date('transfer_date');
-            $table->foreignId('to_project_id')->constrained('projects')->onDelete('cascade');
-            $table->enum('Status', ['completed', 'pending','rejected'])->default('pending');
+            $table->date('date_shipped');
+            $table->foreignId('project_id')->nullable()->constrained()->onDelete('cascade'); 
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('confirmations');
+        Schema::dropIfExists('outgoing_goods');
     }
 };

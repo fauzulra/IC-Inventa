@@ -12,19 +12,16 @@ class Order extends Model
     protected $table = 'orders';
     protected $fillable = [
         'user_id', 
-        'material_id', 
+        'name', 
         'project_id', 
         'quantity', 
+        'unit', 
         'request_date', 
         'status'
     ];
 
     public function user() {
         return $this->belongsTo(User::class); 
-    }
-
-    public function material() {
-        return $this->belongsTo(Material::class);
     }
 
     public function project() {

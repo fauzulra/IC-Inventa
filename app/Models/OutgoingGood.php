@@ -12,20 +12,27 @@ class OutgoingGood extends Model
     protected $table = 'outgoing_goods';
 
     protected $fillable = [
-        'item_id',
+        'material_id',
+        'project_id', // Ini menggantikan destination
         'quantity',
         'date_shipped',
-        'destination', 
     ];
 
     protected $casts = [
-        'date_shipped' => 'date',
+        'date_shipped' => 'date:d/m/Y',
     ];
 
     public function material()
     {
         return $this->belongsTo(Material::class);
     }
+
+    // Relasi ke tabel Project
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
+
 
     protected static function booted()
     {

@@ -55,16 +55,20 @@
                             <td class="border border-gray-200 px-4 py-1.5">{{ $supplier->name }}</td>
 
                             <td class="border border-gray-200 px-4 py-1.5">
-                                {{ $supplier->description ?? '-' }}
+                                {{ ucwords($supplier->description) ?? '-' }}
                             </td>
 
                             <td class="border border-gray-200 px-4 py-1.5 text-center">
                                 <div class="flex justify-center gap-2">
+                                    {{-- Tombol Edit --}}
                                     <button
+                                        onclick="openEditModal('{{ $supplier->id }}', '{{ $supplier->name }}', '{{ $supplier->description }}', '{{ $supplier->phone }}', '{{ $supplier->address }}')"
                                         class="text-orange-400 border border-orange-400 hover:bg-orange-50 rounded p-1 w-8 h-8 flex items-center justify-center transition">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button
+
+                                    {{-- Tombol Delete --}}
+                                    <button onclick="openDeleteModal('{{ $supplier->id }}')"
                                         class="text-red-500 border border-red-500 hover:bg-red-50 rounded p-1 w-8 h-8 flex items-center justify-center transition">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
@@ -94,6 +98,7 @@
             </button>
         </div>
     </div>
+    {{-- Modal tambah Data --}}
     <div id="modalTambahPemasok" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title"
         role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -161,12 +166,120 @@
             </div>
         </div>
     </div>
+    {{-- MODAL EDIT PEMASOK --}}
+    <div id="modalEditPemasok" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title"
+        role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div onclick="toggleModal('modalEditPemasok')"
+                class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-100">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg leading-6 font-bold text-gray-900">Edit Data Pemasok</h3>
+                        <button onclick="toggleModal('modalEditPemasok')"
+                            class="text-gray-400 hover:text-gray-500 focus:outline-none">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+                    <form id="editSupplierForm" method="POST">
+                        @csrf
+                        @method('PUT')
 
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Nama Pemasok</label>
+                            <input type="text" id="edit_name" name="name" required
+                                class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Deskripsi</label>
+                            <input type="text" id="edit_description" name="description"
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">No. Telepon</label>
+                            <input type="text" id="edit_phone" name="phone"
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Alamat</label>
+                            <textarea id="edit_address" name="address" rows="3"
+                                class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent"></textarea>
+                        </div>
+
+                        <div class="flex flex-row-reverse">
+                            <button type="submit"
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#FFB22C] text-base font-medium text-white hover:bg-orange-500 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Update</button>
+                            <button type="button" onclick="toggleModal('modalEditPemasok')"
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- MODAL DELETE PEMASOK --}}
+    <div id="modalDeletePemasok" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title"
+        role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div onclick="toggleModal('modalDeletePemasok')"
+                class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-100">
+                    <h3 class="text-lg leading-6 font-bold text-gray-900">Konfirmasi Hapus</h3>
+                </div>
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+                    <p class="text-sm text-gray-500 mb-4">Apakah Anda yakin ingin menghapus data pemasok ini? Tindakan ini
+                        tidak dapat dibatalkan.</p>
+                    <form id="deleteSupplierForm" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <div class="flex flex-row-reverse">
+                            <button type="submit"
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Hapus</button>
+                            <button type="button" onclick="toggleModal('modalDeletePemasok')"
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('script')
     <script>
         function toggleModal(modalID) {
             document.getElementById(modalID).classList.toggle("hidden");
+        }
+
+        // Fungsi membuka Modal Edit
+        function openEditModal(id, name, description, phone, address) {
+            let form = document.getElementById('editSupplierForm');
+            form.action = `/supplier/${id}`; // Pastikan URL sesuai dengan nama route Anda
+
+            document.getElementById('edit_name').value = name;
+            document.getElementById('edit_description').value = description || '';
+            document.getElementById('edit_phone').value = phone || '';
+            document.getElementById('edit_address').value = address || '';
+
+            toggleModal('modalEditPemasok');
+        }
+
+        // Fungsi membuka Modal Delete
+        function openDeleteModal(id) {
+            let form = document.getElementById('deleteSupplierForm');
+            form.action = `/supplier/${id}`; // Pastikan URL sesuai dengan nama route Anda
+
+            toggleModal('modalDeletePemasok');
         }
     </script>
     @include('layout.script')

@@ -5,14 +5,14 @@
 @section('content')
     <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md border border-gray-200">
 
-        {{-- <h2 class="text-xl font-semibold text-gray-800 mb-16">Kirim Baarang Antar Proyek</h2> --}}
+        <h2 class="text-xl font-semibold text-gray-800 mb-16">Kirim Baarang Antar Proyek</h2>
 
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">Kirim Barang Antar Proyek</h2>
+        {{-- <h2 class="text-xl font-semibold text-gray-800 mb-4">Kirim Barang Antar Proyek</h2>
 
         <button onclick="toggleModal('modalTransferBarang')"
             class="bg-[#FFB22C] hover:bg-orange-500 text-white font-medium text-sm py-3 px-4 rounded-md mb-6 flex items-center gap-2 transition duration-200">
             <i class="fas fa-plus"></i> Kirim Barang
-        </button>
+        </button> --}}
 
         {{-- Show & Search --}}
         <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">

@@ -51,32 +51,41 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody" class="text-sm text-gray-600">
-                    <tr class="hover:bg-gray-50">
-                        <td class="border border-gray-200 px-4 py-3 text-center">1</td>
-                        <td class="border border-gray-200 px-4 py-3">Triplek 9mm x 1,2m x 2,4m</td>
-                        <td class="border border-gray-200 px-4 py-3"></td>
-                        <td class="border border-gray-200 px-4 py-3"></td>
-                        <td class="border border-gray-200 px-4 py-3">Staf Cipta Land</td>
-                        <td class="border border-gray-200 px-4 py-3">Cipta Land</td>
-                    </tr>
+                    @forelse ($orders as $order)
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="border border-gray-200 px-4 py-3 text-center">{{ $loop->iteration }}</td>
 
-                    <tr class="hover:bg-gray-50">
-                        <td class="border border-gray-200 px-4 py-3 text-center">2</td>
-                        <td class="border border-gray-200 px-4 py-3">Semen 40kg</td>
-                        <td class="border border-gray-200 px-4 py-3"></td>
-                        <td class="border border-gray-200 px-4 py-3"></td>
-                        <td class="border border-gray-200 px-4 py-3">Staf Cipta Grand City</td>
-                        <td class="border border-gray-200 px-4 py-3">Cipta Grand City</td>
-                    </tr>
+                            <td class="border border-gray-200 px-4 py-3">
+                                {{ $order->material ? $order->material->name : 'Item Dihapus' }}
+                            </td>
 
-                    <tr class="hover:bg-gray-50">
-                        <td class="border border-gray-200 px-4 py-3 text-center">3</td>
-                        <td class="border border-gray-200 px-4 py-3">Paku Kayu 3"</td>
-                        <td class="border border-gray-200 px-4 py-3"></td>
-                        <td class="border border-gray-200 px-4 py-3"></td>
-                        <td class="border border-gray-200 px-4 py-3">Staf Cipta Residence</td>
-                        <td class="border border-gray-200 px-4 py-3">Cipta Residence</td>
-                    </tr>
+                            <td class="border border-gray-200 px-4 py-3">
+                                {{ $order->quantity }} {{ $order->material ? $order->material->unit : '' }}
+                            </td>
+
+                            <td class="border border-gray-200 px-4 py-3">
+                                {{ date('d/m/Y', strtotime($order->request_date)) }}
+                            </td>
+
+                            <td class="border border-gray-200 px-4 py-3">
+                                {{ $order->user ? $order->user->name : 'User Dihapus' }}
+                            </td>
+
+                            <td class="border border-gray-200 px-4 py-3">
+                                @if ($order->project)
+                                    {{ $order->project->code }} - {{ $order->project->name }}
+                                @else
+                                    <span class="text-gray-400 italic">Proyek Dihapus</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="border border-gray-200 px-4 py-6 text-center text-gray-500">
+                                Belum ada data pesanan yang diajukan.
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -122,63 +131,78 @@
                 </div>
 
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
-                    <form>
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Item</label>
-                            <input type="text"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent">
-                        </div>
+                    <form action="{{ route('order.store') }}" method="POST">
+                        @csrf
 
                         <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Kuantitas</label>
-                            <input type="number"
-                                class="shadow appearance-none border rounded w-32 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Nama Item / Material</label>
+                            <input type="text" name="name" placeholder="Contoh: Triplek 9mm..." required
+                                class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                         </div>
+
+                        <div class="flex gap-4 mb-4">
+                            <div class="w-1/2">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Kuantitas</label>
+                                <input type="number" name="quantity" placeholder="0" required min="0"
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
+                            </div>
+
+                            <div class="w-1/2">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Satuan</label>
+                                <input type="text" name="unit" placeholder="Pcs / Kg / Lembar" required
+                                    class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
+                            </div>
+                        </div>
+
 
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal Pengajuan</label>
-                            <input type="date"
+                            <input type="date" name="request_date" required value="{{ old('request_date') }}"
                                 class="shadow appearance-none border rounded w-full sm:w-1/2 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent">
-                            {{-- <p class="text-xs text-gray-300 mt-2 ml-3">DD/MM/YYYY</p> --}}
+                            @error('request_date')
+                                <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Diajukan Oleh</label>
-
                             <div class="relative">
-                                <select
+                                <select name="user_id" required
                                     class="shadow appearance-none border rounded w-full py-2 pl-3 pr-10 text-gray-700 leading-normal focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent bg-white">
                                     <option value="" disabled selected>Pilih Nama Pengaju...</option>
-                                    <option value="Seno">Seno - Admin</option>
-                                    <option value="Budi">Budi - Staf Lapangan</option>
-                                    <option value="Roni">Roni - Logistik</option>
+                                    @foreach ($users as $user)
+                                        <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                    @endforeach
                                 </select>
-
                                 <div
                                     class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
                                     <i class="fas fa-chevron-down text-xs"></i>
                                 </div>
                             </div>
+                            @error('user_id')
+                                <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div class="mb-6">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Ditujukan untuk Proyek</label>
-
                             <div class="relative">
-                                <select
+                                <select name="project_id" required
                                     class="shadow appearance-none border rounded w-full py-2 pl-3 pr-10 text-gray-700 leading-normal focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent bg-white">
                                     <option value="" disabled selected>Pilih Proyek...</option>
-                                    <option value="Cipta Land">Cipta Land</option>
-                                    <option value="Cipta Grand City">Cipta Grand City</option>
-                                    <option value="Cipta Residence">Cipta Residence</option>
-                                    <option value="Cipta Piayu Village">Cipta Piayu Village</option>
+                                    @foreach ($projects as $project)
+                                        <option value="{{ $project->id }}">{{ $project->code }} - {{ $project->name }}
+                                        </option>
+                                    @endforeach
                                 </select>
-
                                 <div
                                     class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
                                     <i class="fas fa-chevron-down text-xs"></i>
                                 </div>
                             </div>
+                            @error('project_id')
+                                <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div class="flex flex-row-reverse">

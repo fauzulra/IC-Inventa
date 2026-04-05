@@ -54,4 +54,38 @@ class ProjectController extends Controller
         // 5. Redirect kembali dengan pesan sukses
         return redirect()->back()->with('success', 'Data Proyek berhasil ditambahkan!');
     }
+
+
+    public function update(Request $request, $id)
+    {
+        // 1. Validasi Input
+        $request->validate([
+            'name'              => 'required|string|max:255',
+            'location'          => 'required|string|max:255',
+            'logistics_contact' => 'required|string|max:255',
+        ]);
+
+        // 2. Cari Data Proyek berdasarkan ID
+        $project = Project::findOrFail($id);
+
+        // 3. Update Data (Kode proyek biarkan tetap/tidak diubah)
+        $project->update([
+            'name'              => ucwords(strtolower($request->name)),
+            'location'          => ucwords(strtolower($request->location)),
+            'logistics_contact' => $request->logistics_contact,
+        ]);
+
+        // 4. Redirect kembali dengan pesan sukses
+        return redirect()->back()->with('success', 'Data Proyek berhasil diperbarui!');
+    }
+
+    public function destroy($id)
+    {
+        // 1. Cari Data Proyek dan Hapus
+        $project = Project::findOrFail($id);
+        $project->delete();
+
+        // 2. Redirect kembali
+        return redirect()->back()->with('success', 'Data Proyek berhasil dihapus!');
+    }
 }
