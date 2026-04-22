@@ -35,7 +35,7 @@
                     <h2 class="mt-2 text-3xl font-bold text-gray-900">Log In</h2>
                 </div>
 
-                <form class="mt-4 space-y-4" action="" method="POST">
+                <form class="mt-4 space-y-4" action="{{ route('login') }}" method="POST">
                     @csrf
 
                     <div class="">

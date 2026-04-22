@@ -130,7 +130,7 @@
         </div>
     </a>
 
-    <form action="" method="POST">
+    <form action="{{ route('logout') }}" method="POST">
         @csrf
         <button type="submit"
             class="group flex items-center w-full text-sm font-bold text-gray-700 hover:text-red-600 transition-colors duration-200">

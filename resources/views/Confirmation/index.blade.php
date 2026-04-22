@@ -42,48 +42,41 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody" class="text-sm text-gray-600">
+                    @forelse ($orders as $order)
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="border border-gray-200 px-4 py-3 text-center">{{ $loop->iteration }}</td>
+                            <td class="border border-gray-200 px-4 py-3">{{ $order->name }}</td>
+                            <td class="border border-gray-200 px-4 py-3">{{ $order->quantity }} {{ $order->unit }}</td>
+                            <td class="border border-gray-200 px-4 py-3">
+                                {{ \Carbon\Carbon::parse($order->request_date)->format('d/m/Y') }}</td>
+                            <td class="border border-gray-200 px-4 py-3">{{ $order->project ? $order->project->name : '-' }}
+                            </td>
+                            <td class="border border-gray-200 px-4 py-3 text-center">
 
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="border border-gray-200 px-4 py-3 text-center">1</td>
-                        <td class="border border-gray-200 px-4 py-3">Triplek 9mm x 1,2m x 2,4m</td>
-                        <td class="border border-gray-200 px-4 py-3">100</td>
-                        <td class="border border-gray-200 px-4 py-3">01/02/2024</td>
-                        <td class="border border-gray-200 px-4 py-3">Cipta Land</td>
-                        <td class="border border-gray-200 px-4 py-3 text-center">
-                            <button onclick="openStatusModal('Triplek 9mm x 1,2m x 2,4m')"
-                                class="bg-orange-400 hover:bg-orange-500 text-white px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition transform hover:scale-105 shadow-sm">
-                                Berjalan
-                            </button>
-                        </td>
-                    </tr>
+                                @php
+                                    $btnColor = 'bg-blue-400 hover:bg-blue-500'; // Default untuk 'pending'
+                                    if ($order->status == 'Berjalan') {
+                                        $btnColor = 'bg-orange-400 hover:bg-orange-500';
+                                    }
+                                    if ($order->status == 'Selesai') {
+                                        $btnColor = 'bg-green-500 hover:bg-green-600';
+                                    }
+                                    if ($order->status == 'Dibatalkan') {
+                                        $btnColor = 'bg-red-500 hover:bg-red-600';
+                                    }
+                                @endphp
 
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="border border-gray-200 px-4 py-3 text-center">2</td>
-                        <td class="border border-gray-200 px-4 py-3">Semen 40kg</td>
-                        <td class="border border-gray-200 px-4 py-3">50</td>
-                        <td class="border border-gray-200 px-4 py-3">02/02/2024</td>
-                        <td class="border border-gray-200 px-4 py-3">Cipta Grand City</td>
-                        <td class="border border-gray-200 px-4 py-3 text-center">
-                            <button onclick="openStatusModal('Semen 40kg')"
-                                class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition transform hover:scale-105 shadow-sm">
-                                Selesai
-                            </button>
-                        </td>
-                    </tr>
-
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="border border-gray-200 px-4 py-3 text-center">3</td>
-                        <td class="border border-gray-200 px-4 py-3">Paku Kayu 3"</td>
-                        <td class="border border-gray-200 px-4 py-3">20</td>
-                        <td class="border border-gray-200 px-4 py-3">03/02/2024</td>
-                        <td class="border border-gray-200 px-4 py-3">Cipta Residence</td>
-                        <td class="border border-gray-200 px-4 py-3 text-center">
-                            <button onclick="openStatusModal('Paku Kayu 3')"
-                                class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition transform hover:scale-105 shadow-sm">
-                                Dibatalkan
-                            </button>
-                        </td>
-                    </tr>
+                                <button onclick="openStatusModal('{{ $order->id }}', '{{ $order->name }}')"
+                                    class="{{ $btnColor }} text-white px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition transform hover:scale-105 shadow-sm">
+                                    {{ ucfirst($order->status) }}
+                                </button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-gray-500">Belum ada data pesanan.</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -127,7 +120,9 @@
                 </div>
 
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
-                    <form>
+                    <form id="statusForm" method="POST" action="">
+                        @csrf
+                        @method('PUT')
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Item yang diupdate</label>
                             <input type="text" id="modalItemName" value="" readonly
@@ -189,10 +184,15 @@
 @endsection
 @section('script')
     <script>
-        function openStatusModal(itemName) {
-            // Isi nama item ke input readonly di modal
+        // JS Sekarang menerima orderId dan itemName
+        function openStatusModal(orderId, itemName) {
+            // 1. Isi nama item ke input readonly di modal
             document.getElementById('modalItemName').value = itemName;
-            // Tampilkan modal
+
+            // 2. Ubah URL form action sesuai dengan ID pesanan yang akan diupdate
+            document.getElementById('statusForm').action = "/confirmation/" + orderId;
+
+            // 3. Tampilkan modal
             document.getElementById('modalKonfirmasiStatus').classList.remove('hidden');
         }
 

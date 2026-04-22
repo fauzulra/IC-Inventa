@@ -56,7 +56,7 @@
                             <td class="border border-gray-200 px-4 py-3 text-center">{{ $loop->iteration }}</td>
 
                             <td class="border border-gray-200 px-4 py-3">
-                                {{ $order->material ? $order->material->name : 'Item Dihapus' }}
+                                {{ $order->name }}
                             </td>
 
                             <td class="border border-gray-200 px-4 py-3">
@@ -138,19 +138,28 @@
                             <label class="block text-gray-700 text-sm font-bold mb-2">Nama Item / Material</label>
                             <input type="text" name="name" placeholder="Contoh: Triplek 9mm..." required
                                 class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
+                            @error('material_id')
+                                <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div class="flex gap-4 mb-4">
                             <div class="w-1/2">
                                 <label class="block text-gray-700 text-sm font-bold mb-2">Kuantitas</label>
-                                <input type="number" name="quantity" placeholder="0" required min="0"
+                                <input type="number" name="quantity" placeholder="0" required min="1"
                                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
+                                @error('quantity')
+                                    <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
+                                @enderror
                             </div>
 
                             <div class="w-1/2">
                                 <label class="block text-gray-700 text-sm font-bold mb-2">Satuan</label>
                                 <input type="text" name="unit" placeholder="Pcs / Kg / Lembar" required
                                     class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
+                                @error('stock')
+                                    <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 

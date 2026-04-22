@@ -29,8 +29,9 @@ class OrderController extends Controller
     {
         // 1. Validasi Input
         $request->validate([
-            'material_id'  => 'required|integer|exists:materials,id',
+            'name'         => 'required|string|max:255',
             'quantity'     => 'required|integer|min:1',
+            'unit'        => 'required|string|max:50', // <-- TAMBAHKAN INI
             'request_date' => 'required|date',
             'user_id'      => 'required|integer|exists:users,id',
             'project_id'   => 'required|integer|exists:projects,id',
@@ -38,12 +39,13 @@ class OrderController extends Controller
 
         // 2. Simpan pesanan ke database
         Order::create([
-            'material_id'  => $request->material_id,
+            'name'  => $request->name,
             'quantity'     => $request->quantity,
             'request_date' => $request->request_date,
             'user_id'      => $request->user_id,
+            'unit'        => $request->unit,
             'project_id'   => $request->project_id,
-            // 'status' tidak perlu diisi, database akan mengisinya otomatis dengan 'pending'
+            'status'       => 'pending'
         ]);
 
         // 3. Redirect kembali

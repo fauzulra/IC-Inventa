@@ -22,8 +22,8 @@ class Confirmation extends Model
     public function material() {
         return $this->belongsTo(Material::class);
     }
-
-    public function toProject() {
+    public function project()
+    {
         return $this->belongsTo(Project::class, 'to_project_id');
     }
 }
