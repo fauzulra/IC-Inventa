@@ -1,20 +1,20 @@
 @extends('layout.app')
 
-@section('title', 'Data Master Material')
+@section('title', 'Pilih Proyek')
 
 @section('content')
     <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-sm border border-gray-200 mt-6">
 
-
-        <h2 class="text-xl font-bold text-gray-800 mb-6">Daftar Material Proyek</h2>
+        <!-- Judul dinamis (Bisa berubah jadi Data Master, Pemesanan, dll) -->
+        <h2 class="text-xl font-bold text-gray-800 mb-6">{{ $title }}</h2>
 
         <div class="mb-4">
             <label class="block text-gray-700 text-sm font-semibold mb-2">Pilih Proyek</label>
 
-            <!-- List Proyek -->
             <div class="border border-gray-300 rounded-md overflow-hidden">
                 @forelse ($projects as $project)
-                    <a href="{{ route('material.project.show', $project->id) }}"
+                    <!-- Link dinamis sesuai target menu yang diklik Admin -->
+                    <a href="{{ route($targetRoute, $project->id) }}"
                         class="block px-4 py-3 bg-white border-b border-gray-200 hover:bg-gray-50 transition duration-150 ease-in-out text-sm text-gray-700 font-medium">
                         {{ $project->name }}
                     </a>
@@ -26,9 +26,8 @@
             </div>
         </div>
 
-        <!-- Pagination (Disesuaikan dengan warna coklat di Figma) -->
+        <!-- Pagination -->
         <div class="flex justify-center items-center mt-8 gap-2">
-
             @if ($projects->onFirstPage())
                 <button disabled
                     class="bg-[#854d3d] opacity-50 cursor-not-allowed text-white px-4 py-1.5 rounded-md font-medium text-sm flex items-center gap-2">
@@ -61,7 +60,6 @@
                     Selanjutnya <i class="fas fa-arrow-right"></i>
                 </button>
             @endif
-
         </div>
 
     </div>

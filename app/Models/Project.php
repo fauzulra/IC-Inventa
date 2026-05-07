@@ -28,4 +28,13 @@ class Project extends Model
         return $this->hasMany(OutgoingGood::class);
     }
 
+    public function materials()
+    {
+        return $this->belongsToMany(Material::class)->withPivot('stock')->withTimestamps();
+    }
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
 }

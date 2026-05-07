@@ -14,11 +14,15 @@ return new class extends Migration
             $table->string('name');
             $table->foreignId('project_id')->constrained(); 
             $table->integer('quantity');
+            
             // REVISI 1: Ubah integer menjadi string
             $table->string('unit'); 
+            
             $table->date('request_date');
+            
             // REVISI 2: Jadikan string agar tidak error jika UI mengirim teks bahasa Indonesia
             $table->string('status')->default('pending'); 
+            
             $table->timestamps();
         });
     }

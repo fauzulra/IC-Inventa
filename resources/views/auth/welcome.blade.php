@@ -26,13 +26,13 @@
             </div>
         </div>
 
-        <div class="w-full lg:w-1/2 flex items-center justify-center bg-white px-8 py-12">
+        <div class="w-full lg:w-1/2 flex items-center justify-center bg-white px-8 py-6">
             <div class="w-full max-w-md space-y-4">
 
                 <div class="text-center">
                     <img class="mx-auto h-40 w-auto" src="{{ asset('images/logo.png') }}" alt="Inventa Cipta">
 
-                    <h2 class="mt-2 text-3xl font-bold text-gray-900">Log In</h2>
+                    <h2 class="mt-1 text-3xl font-bold text-gray-900">Log In</h2>
                 </div>
 
                 <form class="mt-4 space-y-4" action="{{ route('login') }}" method="POST">
@@ -71,7 +71,7 @@
                     <div class="flex items-center justify-center">
                         <div class="text-sm">
                             <a href="#" class="font-medium text-[#0065F8] hover:text-blue-800 underline">
-                                Lupa Password
+                                Lupa Password?
                             </a>
                         </div>
                     </div>
@@ -80,6 +80,15 @@
                             class="group relative w-60 flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#8B4513] hover:bg-[#723b10] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 shadow-lg">
                             Log In
                         </button>
+                    </div>
+                    <div class="flex items-center justify-center">
+                        <div class="text-sm">
+                            <span class="font-medium text-gray-600">Belum punya akun?</span>
+                            <a href="{{ route('register') }}"
+                                class="font-medium text-[#0065F8] hover:text-blue-800 underline ">
+                                Daftar disini
+                            </a>
+                        </div>
                     </div>
                 </form>
             </div>

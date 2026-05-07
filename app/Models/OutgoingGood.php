@@ -12,46 +12,26 @@ class OutgoingGood extends Model
     protected $table = 'outgoing_goods';
 
     protected $fillable = [
-        'material_id',
-        'project_id', // Ini menggantikan destination
-        'quantity',
-        'date_shipped',
+        'source_project_id', 
+        'destination_project_id', 
+        'material_id', 
+        'quantity', 
+        'date_shipped'
     ];
 
-    protected $casts = [
-        'date_shipped' => 'date:d/m/Y',
-    ];
-
+    // Relasi untuk proyek asal
     public function material()
     {
-        return $this->belongsTo(Material::class);
+        return $this->belongsTo(Material::class, 'material_id');
+    }
+    public function sourceProject()
+    {
+        return $this->belongsTo(Project::class, 'source_project_id');
     }
 
-    // Relasi ke tabel Project
-    public function project()
+    public function destinationProject()
     {
-        return $this->belongsTo(Project::class);
-    }
-
-
-    protected static function booted()
-    {
-        static::created(function ($outgoing) {
-            $material = $outgoing->material;
-            
-            if ($material) {
-                $material->decrement('stock', $outgoing->quantity);
-            }
-        });
-
-        static::deleted(function ($outgoing) {
-            $material = $outgoing->material;
-            
-            if ($material) {
-                $material->increment('stock', $outgoing->quantity);
-            }
-        });
-        
+        return $this->belongsTo(Project::class, 'destination_project_id');
     }
 }
     

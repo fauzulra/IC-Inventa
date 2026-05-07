@@ -38,7 +38,7 @@
 
     <div class="flex flex-1 overflow-hidden">
 
-        <aside class="w-55.5 bg-[#F0F0F0] border-r-[3px] border-gray-300 flex-none hidden md:block overflow-y-auto">
+        <aside class="w-60 bg-[#F0F0F0] border-r-[3px] border-gray-300 flex-none hidden md:block">
             @include('layout.sidebar')
         </aside>
 

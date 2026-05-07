@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\ItemTransfer;
 use App\Models\Material;
+use App\Models\Order;
 use App\Models\Project;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -15,94 +17,153 @@ class ItemTransferController extends Controller
      */
     public function index()
     {
-        // Menampilkan histori transfer beserta relasi nama material dan proyek
-        $transfers = ItemTransfer::all();
-        
-        // Memanggil data material dan proyek untuk mengisi Dropdown di Modal
-        $materials = Material::orderBy('name', 'asc')->get();
-        $projects = Project::orderBy('name', 'asc')->get();
+        $user = auth()->user();
 
-        return view('itemtransfer.index', compact('transfers', 'materials', 'projects'));
-    }
-
-    public function store(Request $request)
-    {
-        // 1. Validasi Input Dasar
-        $request->validate([
-            'material_id'   => 'required|integer|exists:materials,id',
-            'to_project_id' => 'required|integer|exists:projects,id',
-            'quantity'      => 'required|integer|min:1',
-            'transfer_date' => 'required|date',
-        ]);
-
-        // 2. Ambil data material yang dipilih
-        $material = Material::findOrFail($request->material_id);
-
-        // 3. Cek apakah stok mencukupi
-        if ($request->quantity > $material->stock) {
-            return redirect()->back()
-                ->withInput() // Mengembalikan isian form user sebelumnya
-                ->withErrors(['quantity' => 'Stok tidak mencukupi! Sisa stok di gudang hanya ' . $material->stock . ' ' . $material->unit]);
+        // Keamanan: Jika bukan admin, tolak akses dan arahkan ke dashboard
+        if (!$user->hasRole('admin')) {
+            return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses ke halaman histori global.');
         }
 
-        // 4. Gunakan DB Transaction (Sangat penting untuk aplikasi inventaris!)
-        DB::transaction(function () use ($request, $material) {
-            
-            // a. Buat riwayat pengiriman barang di tabel item_transfers
-            ItemTransfer::create([
-                'material_id'   => ucwords(strtolower($request->material_id)),
-                'to_project_id' => ucwords(strtolower($request->to_project_id)),
-                'quantity'      => $request->quantity,
-                'transfer_date' => $request->transfer_date,
-            ]);
-
-            // b. Kurangi stok di tabel materials menggunakan fungsi bawaan Laravel (decrement)
-            $material->decrement('stock', $request->quantity);
-            
-        });
-
-        // 5. Redirect kembali dengan pesan sukses
-        return redirect()->back()->with('success', 'Barang berhasil dikirim dan stok di gudang otomatis dikurangi!');
+        // Ambil SEMUA data transfer dari database
+        $transfers = ItemTransfer::with(['material', 'fromProject', 'toProject'])
+                                 ->orderBy('created_at', 'desc')
+                                 ->get();
+                                 
+        return view('itemtransfer.index', compact('transfers'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+   public function orderIndex()
     {
-        //
+        $user = auth()->user();
+        
+        // MENGGUNAKAN SPATIE: Jika BUKAN admin, lempar ke proyeknya
+        if (!$user->hasRole('admin') && $user->project_id) {
+            return redirect()->route('itemtransfer.order.show', $user->project_id);
+        }
+
+        // JIKA ADMIN: Tampilkan form pilih proyek (Meminjam view select_project)
+        $projects = Project::paginate(5);
+        $title = "Pengajuan Transfer Antar Proyek";
+        $targetRoute = 'itemtransfer.order.show'; 
+        
+        return view('material.select_project', compact('projects', 'title', 'targetRoute'));
     }
 
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(ItemTransfer $itemTransfer)
+   public function showProjectOrders($id)
     {
-        //
+        $project = Project::findOrFail($id);
+        
+        // LOGIKA DIBALIK: Tampilkan riwayat transfer yang DIMINTA OLEH proyek ini (berarti to_project_id)
+        $transfers = ItemTransfer::with(['material', 'fromProject'])
+                                 ->where('to_project_id', $id) // <-- INI YANG BERUBAH
+                                 ->orderBy('created_at', 'desc')
+                                 ->get();
+
+        // Ambil semua daftar material dari database global untuk pilihan dropdown
+        $materials = Material::orderBy('name', 'asc')->get(); 
+
+        // Ambil semua proyek KECUALI proyek saat ini (Untuk dropdown "Minta Dari Proyek Mana?")
+        $allProjects = Project::where('id', '!=', $id)->get();
+
+        return view('itemtransfer.order', compact('project', 'transfers', 'materials', 'allProjects'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(ItemTransfer $itemTransfer)
+    public function getProjectMaterials($id)
     {
-        //
+        // Cari proyek beserta relasi material dan stok di tabel pivot
+        $project = Project::with('materials')->findOrFail($id);
+        
+        // Kembalikan datanya dalam format JSON untuk dibaca oleh JavaScript
+        return response()->json($project->materials);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, ItemTransfer $itemTransfer)
+    public function orderStore(Request $request)
     {
-        //
+        $request->validate([
+            'from_project_id' => 'required|integer|exists:projects,id',
+            'to_project_id'   => 'required|integer|exists:projects,id',
+            'material_id'     => 'required|integer|exists:materials,id',
+            'quantity'        => 'required|integer|min:1',
+            'transfer_date'   => 'required|date',
+        ]);
+
+        if ($request->from_project_id == $request->to_project_id) {
+            return redirect()->back()->with('error', 'Gagal! Proyek tujuan tidak boleh sama dengan proyek asal.');
+        }
+
+        // Opsi Keamanan Ekstra: Bisa dicek dulu apakah quantity yang diminta melebihi sisa stok di Pivot Table Proyek Asal
+        // ...
+
+        ItemTransfer::create(array_merge($request->all(), [
+            'status' => 'pending'
+        ]));
+
+        return redirect()->back()->with('success', 'Pengajuan transfer barang berhasil dibuat!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(ItemTransfer $itemTransfer)
+
+    // =========================================================================
+    // BAGIAN 2: KONFIRMASI TRANSFER BARANG
+    // =========================================================================
+    public function confirmationIndex()
     {
-        //
+        $user = auth()->user();
+        
+        // MENGGUNAKAN SPATIE: Jika BUKAN admin, lempar ke proyeknya
+        if (!$user->hasRole('admin') && $user->project_id) {
+            return redirect()->route('itemtransfer.confirmation.show', $user->project_id);
+        }
+
+        // JIKA ADMIN: Tampilkan form pilih proyek
+        $projects = Project::paginate(5);
+        $title = "Konfirmasi Transfer Masuk/Keluar";
+        $targetRoute = 'itemtransfer.confirmation.show'; 
+        
+        return view('material.select_project', compact('projects', 'title', 'targetRoute'));
     }
+
+    public function showProjectConfirmations($id)
+    {
+        $project = Project::findOrFail($id);
+        
+        // LOGIKA BARU: 
+        // HANYA tampilkan transfer di mana proyek ini adalah GUDANG ASAL (yang dimintai barang)
+        // Jangan tampilkan barang yang mereka request sendiri (karena itu ada di halaman Order)
+        $transfers = ItemTransfer::with(['material', 'fromProject', 'toProject'])
+                                 ->where('from_project_id', $id) // <-- INI KUNCINYA
+                                 ->orderBy('created_at', 'desc')
+                                 ->get();
+
+        return view('itemtransfer.confirmation', compact('project', 'transfers'));
+    }
+
+    public function confirmationUpdate(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|string'
+        ]);
+
+        $transfer = ItemTransfer::findOrFail($id);
+
+        // VALIDASI KEAMANAN: Cegah perubahan status jika sudah final
+        if (in_array(strtolower($transfer->status), ['selesai', 'diterima', 'dibatalkan', 'ditolak'])) {
+            return redirect()->back()->with('error', 'Status transfer yang sudah final tidak dapat diubah lagi!');
+        }
+
+        $transfer->update([
+            'status' => $request->status
+        ]);
+
+        /* 
+         * Catatan Fitur Lanjutan:
+         * Jika Anda ingin otomatis memindahkan stok di database ketika status diubah menjadi "Diterima",
+         * Anda bisa menuliskan logika pengurangan stok di Pivot `from_project` 
+         * dan penambahan stok di Pivot `to_project` di bagian sini.
+         */
+
+        return redirect()->back()->with('success', 'Status transfer barang berhasil diperbarui!');
+    }
+
+    
+
 }

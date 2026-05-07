@@ -9,40 +9,30 @@ class IncomingGood extends Model
 {
     use HasFactory;
 
-    protected $table = 'incoming_goods';
-
+    // Pastikan fillable sesuai dengan field di database
     protected $fillable = [
-        'material_id', 
-        'supplier_id', 
-        'quantity', 
-        'date_received', 
-        'notes'
+        'project_id',
+        'material_id',
+        'supplier_id',
+        'quantity',
+        'date_received',
     ];
 
-    public function material() {
+    // Relasi ke tabel Project
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
+
+    // Relasi ke tabel Material
+    public function material()
+    {
         return $this->belongsTo(Material::class);
     }
 
-    public function supplier() {
-        return $this->belongsTo(Supplier::class);
-    }
-
-    protected static function booted()
+    // Relasi ke tabel Supplier
+    public function supplier()
     {
-        static::created(function ($incoming) {
-            $material = $incoming->material;
-            
-            if ($material) {
-                $material->increment('stock', $incoming->quantity);
-            }
-        });
-
-        static::deleted(function ($incoming) {
-            $material = $incoming->material;
-            
-            if ($material) {
-                $material->decrement('stock', $incoming->quantity);
-            }
-        });
+        return $this->belongsTo(Supplier::class);
     }
 }

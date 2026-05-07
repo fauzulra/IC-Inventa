@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Project;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,14 +30,15 @@ class LoginController extends Controller
         if (Auth::attempt($credentials)) {
             // Jika berhasil, buat sesi baru (untuk keamanan)
             $request->session()->regenerate();
-            // Default jika tidak punya role khusus
-            return redirect()->intended('/'); 
+            
+            // PERUBAHAN: Tambahkan pesan sukses di sini
+            return redirect()->intended('/')->with('success', 'Login berhasil! Selamat datang kembali.'); 
         }
 
         // 4. Jika login gagal (username/password salah)
-        return back()->withErrors([
-            'username' => 'Username atau password yang Anda masukkan salah.',
-        ])->onlyInput('username'); // Mengembalikan isi kolom username agar tidak perlu ketik ulang
+        // PERUBAHAN: Gunakan with('error') agar ditangkap oleh SweetAlert error spesifik
+        return back()->with('error', 'Username atau password yang Anda masukkan salah.')
+                     ->onlyInput('username'); 
     }
 
     // Fungsi untuk Logout
@@ -52,8 +54,17 @@ class LoginController extends Controller
     }
 
     public function showRegistrationForm()
-    {
-        return view('auth.register'); 
+    {   
+        $projects = Project::withCount([
+            'users as logistik_count' => function ($query) {
+                $query->role('logistik');
+            },
+            'users as staf_count' => function ($query) {
+                $query->role('staff'); 
+            }
+        ])->orderBy('name', 'asc')->get();
+
+        return view('auth.register', compact('projects')); 
     }
 
     public function register(Request $request)
@@ -65,7 +76,31 @@ class LoginController extends Controller
             'email'    => 'required|string|email|max:255|unique:users',
             'role'     => 'required|string',
             'password' => 'required|string', 
-        ]);
+            'project_id' => 'required_if:role,staf_lapangan,logistik|nullable|exists:projects,id',
+        ], [
+            // Pesan error custom agar admin paham
+            'project_id.required_if' => 'Proyek wajib dipilih untuk Staf Lapangan dan Logistik!'
+        ]);   
+
+        // =====================================================================
+        // 2. LOGIKA BARU: CEK KUOTA PERAN DI DALAM PROYEK (Maksimal 1)
+        // =====================================================================
+        if (in_array($request->role, ['staff', 'logistik']) && $request->project_id) {
+            
+            // Cek apakah di project_id ini sudah ada user dengan role tersebut
+            $isRoleTaken = User::where('project_id', $request->project_id)
+                               ->role($request->role) // Menggunakan scope bawaan Spatie Permission
+                               ->exists();
+
+            if ($isRoleTaken) {
+                // Tentukan nama tampilan untuk pesan error
+                $roleName = $request->role == 'staff' ? 'Staf Lapangan' : 'Logistik';
+                
+                // Kembalikan ke halaman register dengan pesan error SweetAlert dan pertahankan inputan sebelumnya
+                return back()->with('error', "Gagal! Proyek ini sudah memiliki akun {$roleName}. Setiap proyek maksimal hanya boleh memiliki 1 {$roleName}.")
+                             ->withInput(); 
+            }
+        }
 
         // 2. Simpan User Baru ke Database
         $user = User::create([
@@ -73,12 +108,13 @@ class LoginController extends Controller
             'username' => $request->username,
             'email'    => $request->email,
             'password' => Hash::make($request->password), 
+            'project_id' => $request->role == 'admin' ? null : $request->project_id,
         ]);
 
         $user->assignRole($request->role);
 
         // 3. Redirect kembali ke halaman login dengan pesan sukses
-        return redirect()->route('login')->with('success', 'Registrasi berhasil! Silakan login menggunakan akun Anda.');
+        return back()->with('success', 'Registrasi berhasil! Silakan login menggunakan akun Anda.');
     }
 
     public function showForm()

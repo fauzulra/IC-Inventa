@@ -5,12 +5,16 @@
 @section('content')
     <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md border border-gray-200">
 
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">Daftar Proyek PT CIPTATAMA GRIYA PRIMA</h2>
+        @if (auth()->user()->hasRole('admin'))
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Daftar Proyek PT CIPTATAMA GRIYA PRIMA</h2>
 
-        <button onclick="toggleModal('modalTambahProyek')"
-            class="bg-[#FFB22C] hover:bg-orange-500 text-white font-medium text-sm py-3 px-4 rounded-md mb-6 flex items-center gap-2 transition duration-200">
-            <i class="fas fa-plus"></i> Tambah Proyek
-        </button>
+            <button onclick="toggleModal('modalTambahProyek')"
+                class="bg-[#FFB22C] hover:bg-orange-500 text-white font-medium text-sm py-3 px-4 rounded-md mb-6 flex items-center gap-2 transition duration-200">
+                <i class="fas fa-plus"></i> Tambah Proyek
+            </button>
+        @else
+            <h2 class="text-xl font-semibold text-gray-800 mb-20">Daftar Proyek PT CIPTATAMA GRIYA PRIMA</h2>
+        @endif
         {{-- Show & Search --}}
         <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
             <div class="text-gray-600">
@@ -24,7 +28,7 @@
                 entries
             </div>
             <div class="relative">
-                <input type="text" id="searchInput" placeholder="Cari Barang"
+                <input type="text" id="searchInput" placeholder="Cari Proyek"
                     class="border border-gray-300 rounded pl-3 pr-10 py-1.5 focus:outline-none focus:border-orange-400 w-64">
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
                     <i class="fas fa-search"></i>
@@ -41,8 +45,10 @@
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Nama Proyek</th>
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Lokasi</th>
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Logistik</th>
-                        <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700 text-center">Status</th>
-                        <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700 text-center">Aksi</th>
+                        <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700 text-center">Status
+                        </th>
+                        <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700 text-center">Aksi
+                        </th>
                     </tr>
                 </thead>
                 <tbody id="tableBody" class="text-sm text-gray-600">

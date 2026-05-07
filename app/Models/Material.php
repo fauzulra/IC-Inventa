@@ -10,6 +10,7 @@ class Material extends Model
     use HasFactory;
 
     protected $table = 'materials';
+    
     protected $fillable = [
         'name',
         'unit', 
@@ -17,11 +18,24 @@ class Material extends Model
         'supplier_id'
     ];
 
-    public function supplier() {
+    public function supplier() 
+    {
         return $this->belongsTo(Supplier::class);
     }
     
-    public function incomingGoods() {
+    public function incomingGoods() 
+    {
         return $this->hasMany(IncomingGood::class);
+    }
+
+    // Relasi untuk melihat histori barang ini pernah ditransfer ke mana saja
+    public function itemTransfers() 
+    {
+        return $this->hasMany(ItemTransfer::class);
+    }
+
+    public function projects()
+    {
+        return $this->belongsToMany(Project::class)->withPivot('stock')->withTimestamps();
     }
 }

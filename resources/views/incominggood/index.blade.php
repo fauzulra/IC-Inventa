@@ -3,16 +3,35 @@
 @section('title', 'Daftar Barang Masuk')
 
 @section('content')
-    <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md border border-gray-200">
+    <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md border border-gray-200 mt-6">
 
-        {{-- <h2 class="text-xl font-semibold text-gray-800 mb-16">Daftar Barang Masuk PT CIPTATAMA GRIYA PRIMA</h2> --}}
 
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">Daftar Barang Masuk PT CIPTATAMA GRIYA PRIMA</h2>
+        @if (auth()->user()->hasRole('logistik'))
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <div class="flex justify-start w-full md:w-auto">
+                    <h2 class="text-xl font-bold text-gray-800">Barang Masuk - {{ $project->name }}</h2>
+                </div>
+            </div>
 
-        <button onclick="toggleModal('modalTambahBarangMasuk')"
-            class="bg-[#FFB22C] hover:bg-orange-500 text-white font-medium text-sm py-3 px-4 rounded-md mb-6 flex items-center gap-2 transition duration-200">
-            <i class="fas fa-plus"></i> Tambah Barang Masuk
-        </button>
+            <button onclick="toggleModal('modalTambahBarangMasuk')"
+                class="bg-[#FFB22C] hover:bg-orange-500 text-white font-medium text-sm py-3 px-4 rounded-md mb-6 flex items-center gap-2 transition duration-200">
+                <i class="fas fa-plus"></i> Input Barang Masuk
+            </button>
+        @elseif (auth()->user()->hasRole('admin'))
+            <div class="flex flex-col md:flex-row justify-between items-center mb-20 gap-4">
+                <div class="flex justify-start w-full md:w-auto">
+                    <h2 class="text-xl font-bold text-gray-800">Barang Masuk - {{ $project->name }}</h2>
+                </div>
+                <div class="flex justify-end w-full md:w-auto">
+                    <a href="{{ route('incominggood.index') }}"
+                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md transition font-medium flex items-center gap-2">
+                        <i class="fas fa-arrow-left"></i> Kembali
+                    </a>
+                </div>
+            </div>
+        @else
+            <h2 class="text-xl font-bold text-gray-800 mb-20">Barang Masuk - {{ $project->name }}</h2>
+        @endif
 
         {{-- Show & Search --}}
         <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
@@ -41,10 +60,10 @@
                     <tr>
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700 w-12 text-center">ID
                         </th>
-                        <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Item</th>
-                        <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Kuantitas</th>
+                        <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Material</th>
+                        <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Kuantitas Masuk</th>
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Tanggal Masuk</th>
-                        <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Pemasok</th>
+                        <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Sumber / Pemasok</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody" class="text-sm text-gray-600">
@@ -52,12 +71,12 @@
                         <tr class="hover:bg-gray-50 transition">
                             <td class="border border-gray-200 px-4 py-4 text-center">{{ $loop->iteration }}</td>
 
-                            <td class="border border-gray-200 px-4 py-4">
+                            <td class="border border-gray-200 px-4 py-4 font-medium text-gray-900">
                                 {{ $incoming->material ? $incoming->material->name : 'Item Dihapus' }}
                             </td>
 
-                            <td class="border border-gray-200 px-4 py-4">
-                                {{ $incoming->quantity }} {{ $incoming->material ? $incoming->material->unit : '' }}
+                            <td class="border border-gray-200 px-4 py-4 font-bold text-green-600">
+                                +{{ $incoming->quantity }} {{ $incoming->material ? $incoming->material->unit : '' }}
                             </td>
 
                             <td class="border border-gray-200 px-4 py-4">
@@ -65,39 +84,28 @@
                             </td>
 
                             <td class="border border-gray-200 px-4 py-4">
-                                {{ $incoming->supplier ? $incoming->supplier->name : 'Pemasok Dihapus' }}
+                                {{ $incoming->supplier ? $incoming->supplier->name : 'Dari Transfer Proyek / Lainnya' }}
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="5" class="border border-gray-200 px-4 py-6 text-center text-gray-500">
-                                Belum ada data barang masuk.
+                                Belum ada data penerimaan barang di proyek ini.
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        {{-- Pagination --}}
-        <div class="flex justify-center items-center mt-6 gap-2">
-            <button id="prevBtn"
-                class="bg-[#854d3d] hover:bg-[#6b3d31] text-white px-4 py-2 rounded-md font-medium text-sm flex items-center gap-2 transition">
-                <i class="fas fa-arrow-left"></i> Sebelum
-            </button>
-            <div id="pageNumbers" class="flex gap-2"></div>
-            <button id="nextBtn"
-                class="bg-[#854d3d] hover:bg-[#6b3d31] text-white px-4 py-2 rounded-md font-medium text-sm flex items-center gap-2 transition">
-                Selanjutnya <i class="fas fa-arrow-right"></i>
-            </button>
-        </div>
     </div>
+
+    {{-- MODAL TAMBAH BARANG MASUK --}}
     <div id="modalTambahBarangMasuk" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title"
         role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
 
             <div onclick="toggleModal('modalTambahBarangMasuk')"
                 class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
             <div
@@ -105,13 +113,10 @@
 
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-100">
                     <div class="flex justify-between items-center">
-                        <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">
-                            Input Barang Masuk
-                        </h3>
+                        <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">Input Penerimaan Barang</h3>
                         <button onclick="toggleModal('modalTambahBarangMasuk')"
-                            class="text-gray-400 hover:text-gray-500 focus:outline-none">
-                            <i class="fas fa-times"></i>
-                        </button>
+                            class="text-gray-400 hover:text-gray-500 focus:outline-none"><i
+                                class="fas fa-times"></i></button>
                     </div>
                 </div>
 
@@ -119,15 +124,49 @@
                     <form action="{{ route('incominggood.store') }}" method="POST">
                         @csrf
 
+                        <!-- HIDDEN PROJECT ID -->
+                        <input type="hidden" name="project_id" value="{{ $project->id }}">
+
+                        <!-- 1. PILIH PESANAN YANG DATANG -->
+                        <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <label class="block text-blue-800 text-sm font-bold mb-2">Berdasarkan Surat Pesanan:</label>
+                            <div class="relative">
+                                <select name="order_id" id="order_id"
+                                    class="shadow appearance-none border border-blue-300 rounded w-full py-2 pl-3 pr-10 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
+                                    <option value="" selected>-- Pilih Pesanan yang Telah Dikonfirmasi --</option>
+                                    @if (isset($approvedOrders))
+                                        @foreach ($approvedOrders as $order)
+                                            <!-- Kita simpan data kuantitas di atribut 'data-qty' agar bisa dibaca JS -->
+                                            <option value="{{ $order->id }}" data-qty="{{ $order->quantity }}">
+                                                {{ $order->name }} (Pesan: {{ $order->quantity }} {{ $order->unit }}) -
+                                                Tgl: {{ \Carbon\Carbon::parse($order->request_date)->format('d/m/Y') }}
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div
+                                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
+                                    <i class="fas fa-chevron-down text-xs"></i>
+                                </div>
+                            </div>
+                            <p class="text-xs text-blue-600 mt-1 italic">Hanya pesanan berstatus 'Selesai' yang muncul di
+                                sini.</p>
+                        </div>
+
+                        <!-- 2. HUBUNGKAN KE MASTER MATERIAL -->
                         <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Item</label>
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Simpan ke Master Material</label>
                             <div class="relative">
                                 <select name="material_id" required
                                     class="shadow appearance-none border rounded w-full py-2 pl-3 pr-10 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent bg-white">
-                                    <option value="" disabled selected>Pilih Item / Material...</option>
+                                    <option value="" disabled selected>Cocokkan pesanan dengan data Master Material...
+                                    </option>
                                     @foreach ($materials as $material)
-                                        <option value="{{ $material->id }}">{{ $material->name }} (Stok saat ini:
-                                            {{ $material->stock }} {{ $material->unit }})</option>
+                                        {{-- LOGIKA BARU: Tampilkan stok saat ini dari tabel Pivot --}}
+                                        <option value="{{ $material->id }}">
+                                            {{ $material->name }} (Stok saat ini: {{ $material->pivot->stock }}
+                                            {{ $material->unit }})
+                                        </option>
                                     @endforeach
                                 </select>
                                 <div
@@ -135,44 +174,30 @@
                                     <i class="fas fa-chevron-down text-xs"></i>
                                 </div>
                             </div>
-                            @error('material_id')
-                                <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
-                            @enderror
                         </div>
 
+                        <!-- 3. DETAIL PENERIMAAN -->
                         <div class="flex gap-4 mb-4">
                             <div class="w-1/2">
-                                <label class="block text-gray-700 text-sm font-bold mb-2">Kuantitas</label>
-                                <input type="number" name="quantity" placeholder="0" required min="1"
-                                    value="{{ old('quantity') }}"
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Kuantitas Diterima</label>
+                                <input type="number" id="quantity_input" name="quantity" placeholder="0" required
+                                    min="1" value="{{ old('quantity') }}"
                                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
-                                @error('quantity')
-                                    <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
-                                @enderror
                             </div>
-
                             <div class="w-1/2">
-                                <label class="block text-gray-700 text-sm font-bold mb-2">Satuan</label>
-                                <input type="text" placeholder="Mengikuti Item" disabled
-                                    class="bg-gray-100 shadow appearance-none border rounded w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none cursor-not-allowed">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal Diterima</label>
+                                <input type="date" name="date_received" required
+                                    value="{{ old('date_received') ?? \Carbon\Carbon::now()->format('Y-m-d') }}"
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                             </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal Masuk</label>
-                            <input type="date" name="date_received" required value="{{ old('date_received') }}"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
-                            @error('date_received')
-                                <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
-                            @enderror
                         </div>
 
                         <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Pemasok</label>
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Sumber Barang (Pemasok)</label>
                             <div class="relative">
-                                <select name="supplier_id" required
+                                <select name="supplier_id"
                                     class="shadow appearance-none border rounded w-full py-2 pl-3 pr-10 text-gray-700 leading-normal focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent bg-white">
-                                    <option value="" disabled selected>Pilih Pemasok...</option>
+                                    <option value="" selected>-- Dari Transfer Proyek / Lainnya --</option>
                                     @foreach ($suppliers as $supplier)
                                         <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
                                     @endforeach
@@ -182,15 +207,12 @@
                                     <i class="fas fa-chevron-down text-xs"></i>
                                 </div>
                             </div>
-                            @error('supplier_id')
-                                <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
-                            @enderror
                         </div>
 
                         <div class="flex flex-row-reverse">
                             <button type="submit"
                                 class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#FFB22C] text-base font-medium text-white hover:bg-orange-500 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
-                                Simpan
+                                Simpan Penerimaan
                             </button>
                             <button type="button" onclick="toggleModal('modalTambahBarangMasuk')"
                                 class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
@@ -202,7 +224,6 @@
             </div>
         </div>
     </div>
-
 @endsection
 
 @section('script')
@@ -210,6 +231,22 @@
         function toggleModal(modalID) {
             document.getElementById(modalID).classList.toggle("hidden");
         }
+
+        // Script untuk mengisi kuantitas otomatis saat pesanan dipilih
+        document.getElementById('order_id').addEventListener('change', function() {
+            // Ambil opsi yang sedang dipilih
+            let selectedOption = this.options[this.selectedIndex];
+
+            // Ambil data-qty dari opsi tersebut
+            let qty = selectedOption.getAttribute('data-qty');
+
+            // Jika ada isinya, masukkan ke input kuantitas
+            if (qty) {
+                document.getElementById('quantity_input').value = qty;
+            } else {
+                document.getElementById('quantity_input').value = '';
+            }
+        });
     </script>
     @include('layout.script')
 @endsection
