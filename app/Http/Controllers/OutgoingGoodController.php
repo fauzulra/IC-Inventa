@@ -77,10 +77,10 @@ class OutgoingGoodController extends Controller
             'date_shipped'           => 'required|date',
         ]);
 
-        // Mencegah pengiriman ke proyek asal
-        if ($request->source_project_id == $request->destination_project_id) {
-            return redirect()->back()->with('error', 'Gagal! Proyek asal dan proyek tujuan tidak boleh sama.');
-        }
+        // // Mencegah pengiriman ke proyek asal
+        // if ($request->source_project_id == $request->destination_project_id) {
+        //     return redirect()->back()->with('error', 'Gagal! Proyek asal dan proyek tujuan tidak boleh sama.');
+        // }
 
         try {
             DB::beginTransaction();

@@ -66,7 +66,7 @@ class IncomingGoodController extends Controller
         $targetRoute = 'incominggood.project.show'; 
         
         // Kita panggil/pinjam file view select_project milik modul material
-        return view('material.select_project', compact('projects', 'targetRoute'));
+        return view('material.select_project', compact('projects', 'title', 'targetRoute'));
     }
 
     // =========================================================================
