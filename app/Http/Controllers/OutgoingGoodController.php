@@ -42,7 +42,6 @@ class OutgoingGoodController extends Controller
     {
         $user = auth()->user();
 
-        // Keamanan: Cegah staf/logistik mengintip proyek lain
         if (!$user->hasRole('admin') && $user->project_id != $id) {
             return redirect()->route('dashboard')->with('error', 'Akses Ditolak! Anda hanya diizinkan mengakses proyek Anda sendiri.');
         }
@@ -57,7 +56,10 @@ class OutgoingGoodController extends Controller
         $materials = $project->materials()->orderBy('name', 'asc')->get();
         $projects = Project::orderBy('name', 'asc')->get();
 
-        return view('outgoinggood.index', compact('project', 'outgoingGoods', 'materials', 'projects'));
+        // TAMBAHAN UNTUK CETAK LAPORAN:
+        $allProjects = auth()->user()->hasRole('admin') ? Project::orderBy('name', 'asc')->get() : [];
+
+        return view('outgoinggood.index', compact('project', 'outgoingGoods', 'materials', 'projects', 'allProjects'));
     }
 
     /**
@@ -143,5 +145,37 @@ class OutgoingGoodController extends Controller
             DB::rollBack();
             return redirect()->back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
         }
+    }
+
+    // =========================================================================
+    // FUNGSI UNTUK MENCETAK LAPORAN BARANG KELUAR
+    // =========================================================================
+    public function printReport(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date'   => 'required|date|after_or_equal:start_date',
+        ]);
+
+        $user = auth()->user();
+        
+        // Tentukan ID proyek (Admin bisa pilih, Logistik/Staff dipaksa sesuai proyeknya)
+        $projectId = $user->hasRole('admin') ? $request->project_id : $user->project_id;
+
+        // Mulai Query (Gunakan source_project_id karena ini barang keluar dari proyek tersebut)
+        $query = OutgoingGood::with(['material', 'destinationProject'])
+                             ->whereBetween('date_shipped', [$request->start_date, $request->end_date]);
+
+        // Filter berdasarkan Proyek Asal
+        if ($projectId && $projectId != 'all') {
+            $query->where('source_project_id', $projectId);
+            $projectName = Project::find($projectId)->name;
+        } else {
+            $projectName = 'Semua Proyek';
+        }
+
+        $outgoingGoods = $query->orderBy('date_shipped', 'asc')->get();
+
+        return view('outgoinggood.print', compact('outgoingGoods', 'projectName', 'request'));
     }
 }

@@ -11,42 +11,7 @@ use Illuminate\Http\Request;
 
 class IncomingGoodController extends Controller
 {
-    // public function index()
-    // {
-    //     $incomingGoods = IncomingGood::with(['material', 'supplier'])->latest()->get();
-    //     $materials = Material::orderBy('name', 'asc')->get();
-    //     $suppliers = Supplier::orderBy('name', 'asc')->get();
 
-    //     return view('incominggood.index', compact('incomingGoods', 'materials', 'suppliers'));
-    // }
-
-    // // Fungsi untuk memproses data dari form
-    // public function store(Request $request)
-    // {
-    //     // 1. Validasi Input
-    //     $request->validate([
-    //         'material_id'   => 'required|integer|exists:materials,id',
-    //         'supplier_id'   => 'required|integer|exists:suppliers,id',
-    //         'quantity'      => 'required|integer|min:1',
-    //         'date_received' => 'required|date',
-    //     ]);
-
-    //     // 2. Simpan riwayat barang masuk ke tabel incoming_goods
-    //     IncomingGood::create([
-    //         'material_id'   => $request->material_id,
-    //         'supplier_id'   => $request->supplier_id,
-    //         'quantity'      => $request->quantity,
-    //         'date_received' => $request->date_received,
-    //     ]);
-
-    //     // 3. Tambahkan stok ke tabel materials secara otomatis
-    //     // Fungsi increment() otomatis menambah stok sesuai quantity yang diinput
-    //     $material = Material::findOrFail($request->material_id);
-    //     $material->increment('stock', $request->quantity);
-
-    //     // 4. Selesai dan kembali
-    //     return redirect()->back()->with('success', 'Barang masuk berhasil dicatat dan stok gudang otomatis bertambah!');
-    // }
 
     public function index()
     {
@@ -90,7 +55,9 @@ class IncomingGoodController extends Controller
                                            ->where('status', 'Diterima') 
                                            ->get();
 
-        return view('incominggood.index', compact('project', 'incomingGoods', 'materials', 'suppliers', 'approvedOrders'));
+        $allProjects = auth()->user()->hasRole('admin') ? Project::orderBy('name', 'asc')->get() : [];
+
+        return view('incominggood.index', compact('project', 'incomingGoods', 'materials', 'suppliers', 'approvedOrders', 'allProjects'));
     }
 
     public function store(Request $request)
@@ -133,6 +100,38 @@ class IncomingGoodController extends Controller
         }
 
         return redirect()->back()->with('success', 'Barang diterima! Stok proyek bertambah dan Pesanan telah ditutup.');
+    }
+
+    public function printReport(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date'   => 'required|date|after_or_equal:start_date',
+        ]);
+
+        $user = auth()->user();
+        
+        // Tentukan ID proyek yang akan dicetak
+        // Jika Admin, ambil dari dropdown form. Jika Staff/Logistik, paksa gunakan project_id mereka.
+        $projectId = $user->hasRole('admin') ? $request->project_id : $user->project_id;
+
+        // Mulai Query
+        $query = IncomingGood::with(['material', 'supplier', 'project'])
+                             ->whereBetween('date_received', [$request->start_date, $request->end_date]);
+
+        // Filter berdasarkan Proyek (Jika admin memilih 'all', lewati filter ini)
+        if ($projectId && $projectId != 'all') {
+            $query->where('project_id', $projectId);
+            $projectName = Project::find($projectId)->name;
+        } else {
+            $projectName = 'Semua Proyek';
+        }
+
+        // Ambil data yang sudah difilter
+        $incomingGoods = $query->orderBy('date_received', 'asc')->get();
+
+        // Tampilkan ke halaman khusus cetak (kertas)
+        return view('incominggood.print', compact('incomingGoods', 'projectName', 'request'));
     }
 
 }

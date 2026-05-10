@@ -96,6 +96,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/incominggoods', [IncomingGoodController::class, 'index'])->name('incominggood.index');
     Route::get('/incominggoods/project/{id}', [IncomingGoodController::class, 'showProjectIncoming'])->name('incominggood.project.show');
     Route::post('/incominggoods', [IncomingGoodController::class, 'store'])->name('incominggood.store');
+    Route::get('/incominggoods/report/print', [IncomingGoodController::class, 'printReport'])->name('incominggood.report');
 
     // Outgoing Goods
     // Route::get('/outgoinggood',[OutgoingGoodController::class,'index'])->name('outgoinggood.index');
@@ -104,7 +105,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/outgoinggood', [OutgoingGoodController::class, 'index'])->name('outgoinggood.index');
     Route::get('/outgoinggood/project/{id}', [OutgoingGoodController::class, 'showProjectOutgoing'])->name('outgoinggood.project');
     Route::post('/outgoinggood', [OutgoingGoodController::class, 'store'])->name('outgoinggood.store');
-
+    Route::get('/outgoinggood/report/print', [OutgoingGoodController::class, 'printReport'])->name('outgoinggood.report');
     // Item Transfer
     // Route::get('/itemtransfer-confirmation',[ItemTransferController::class,'ConfirmationIndex'])->name('itemtransfer.confirmation');
     // Route::get('/itemtransfer-order',[ItemTransferController::class,'OrderIndex'])->name('itemtransfer.order');

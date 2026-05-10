@@ -9,23 +9,31 @@
         {{-- HEADER BERDASARKAN ROLE PENGGUNA               --}}
         {{-- ============================================== --}}
         @if (auth()->user()->hasRole('logistik'))
-            {{-- Tampilan Logistik --}}
             <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                 <div class="flex justify-start w-full md:w-auto">
                     <h2 class="text-xl font-bold text-gray-800">Daftar Barang Keluar - {{ $project->name }}</h2>
                 </div>
             </div>
-            <button onclick="toggleModal('modalTambahBarangKeluar')"
-                class="bg-[#FFB22C] hover:bg-orange-500 text-white font-medium text-sm py-3 px-4 rounded-md mb-6 flex items-center gap-2 transition duration-200">
-                <i class="fas fa-plus"></i> Tambah Barang Keluar
-            </button>
+            <div class="flex gap-2 mb-6">
+                <button onclick="toggleModal('modalTambahBarangKeluar')"
+                    class="bg-[#FFB22C] hover:bg-orange-500 text-white font-medium text-sm py-3 px-4 rounded-md flex items-center gap-2 transition duration-200">
+                    <i class="fas fa-plus"></i> Tambah Barang Keluar
+                </button>
+                <button onclick="toggleModal('modalCetakLaporan')"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-3 px-4 rounded-md flex items-center gap-2 transition duration-200">
+                    <i class="fas fa-print"></i> Cetak Laporan
+                </button>
+            </div>
         @elseif (auth()->user()->hasRole('admin'))
-            {{-- Tampilan Admin --}}
-            <div class="flex flex-col md:flex-row justify-between items-center mb-20 gap-4">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                 <div class="flex justify-start w-full md:w-auto">
                     <h2 class="text-xl font-bold text-gray-800">Daftar Barang Keluar - {{ $project->name }}</h2>
                 </div>
-                <div class="flex justify-end w-full md:w-auto">
+                <div class="flex justify-end w-full md:w-auto gap-2">
+                    <button onclick="toggleModal('modalCetakLaporan')"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2 px-4 rounded-md flex items-center gap-2 transition duration-200">
+                        <i class="fas fa-print"></i> Cetak Laporan
+                    </button>
                     <a href="{{ route('outgoinggood.index') }}"
                         class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md transition font-medium flex items-center gap-2">
                         <i class="fas fa-arrow-left"></i> Kembali
@@ -33,10 +41,15 @@
                 </div>
             </div>
         @else
-            {{-- TAMPILAN STAF (Tanpa Tombol Tambah, Tanpa Tombol Kembali) --}}
-            <div class="flex flex-col md:flex-row justify-between items-center mb-20 gap-4">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                 <div class="flex justify-start w-full md:w-auto">
                     <h2 class="text-xl font-bold text-gray-800">Daftar Barang Keluar - {{ $project->name }}</h2>
+                </div>
+                <div class="flex justify-end w-full md:w-auto">
+                    <button onclick="toggleModal('modalCetakLaporan')"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2 px-4 rounded-md flex items-center gap-2 transition duration-200">
+                        <i class="fas fa-print"></i> Cetak Laporan
+                    </button>
                 </div>
             </div>
         @endif
@@ -164,7 +177,8 @@
                                     <input type="number" name="quantity" id="quantity_input" placeholder="0" required
                                         min="1"
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
-                                    <p id="stockHelpText" class="text-xs text-red-500 mt-1 hidden">Kuantitas melebihi stok!
+                                    <p id="stockHelpText" class="text-xs text-red-500 mt-1 hidden">Kuantitas melebihi
+                                        stok!
                                     </p>
                                 </div>
                                 <div class="w-1/2">
@@ -216,6 +230,84 @@
             </div>
         </div>
     @endif
+
+    {{-- MODAL CETAK LAPORAN BARANG KELUAR --}}
+    <div id="modalCetakLaporan" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title"
+        role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div onclick="toggleModal('modalCetakLaporan')"
+                class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-100">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">Cetak Laporan Barang Keluar
+                        </h3>
+                        <button onclick="toggleModal('modalCetakLaporan')"
+                            class="text-gray-400 hover:text-gray-500 focus:outline-none">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+                    <form action="{{ route('outgoinggood.report') }}" method="GET" target="_blank">
+
+                        @if (auth()->user()->hasRole('admin'))
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Pilih Proyek Asal</label>
+                                <select name="project_id"
+                                    class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                    <option value="all">-- Semua Proyek --</option>
+                                    @foreach ($allProjects as $proj)
+                                        <option value="{{ $proj->id }}"
+                                            {{ $project->id == $proj->id ? 'selected' : '' }}>
+                                            {{ $proj->code }} - {{ $proj->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @else
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Proyek Asal</label>
+                                <input type="text" disabled value="{{ $project->name }}"
+                                    class="shadow border rounded w-full py-2 px-3 text-gray-500 bg-gray-100 cursor-not-allowed">
+                                <input type="hidden" name="project_id" value="{{ $project->id }}">
+                            </div>
+                        @endif
+
+                        <div class="flex gap-4 mb-6">
+                            <div class="w-1/2">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Dari Tanggal</label>
+                                <input type="date" name="start_date" required
+                                    value="{{ \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') }}"
+                                    class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            </div>
+                            <div class="w-1/2">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Sampai Tanggal</label>
+                                <input type="date" name="end_date" required
+                                    value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"
+                                    class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            </div>
+                        </div>
+
+                        <div class="flex flex-row-reverse mt-2">
+                            <button type="submit" onclick="toggleModal('modalCetakLaporan')"
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                                <i class="fas fa-print mr-2 mt-1"></i> Cetak Laporan
+                            </button>
+                            <button type="button" onclick="toggleModal('modalCetakLaporan')"
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                Batal
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('script')
