@@ -6,26 +6,39 @@
     <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md border border-gray-200 mt-6">
 
         {{-- Header & Tombol Kembali --}}
-        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-            <div class="flex justify-start w-full md:w-auto">
-                <h2 class="text-xl font-bold text-gray-800">Pengajuan Transfer - {{ $project->name }}</h2>
+        @if (auth()->user()->hasRole('logistik'))
+            {{-- Tampilan Logistik --}}
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <div class="flex justify-start w-full md:w-auto">
+                    <h2 class="text-xl font-bold text-gray-800">Pengajuan Transfer - {{ $project->name }}</h2>
+                </div>
             </div>
 
-            @if (auth()->user()->hasRole('admin'))
+            <button onclick="toggleModal('modalTambahPesanan')"
+                class="bg-[#FFB22C] hover:bg-orange-500 text-white font-medium text-sm py-3 px-4 rounded-md mb-6 flex items-center gap-2 transition duration-200">
+                <i class="fas fa-plus"></i> Buat Pengajuan Transfer
+            </button>
+        @elseif (auth()->user()->hasRole('admin'))
+            {{-- Tampilan Admin --}}
+            <div class="flex flex-col md:flex-row justify-between items-center mb-20 gap-4">
+                <div class="flex justify-start w-full md:w-auto">
+                    <h2 class="text-xl font-bold text-gray-800">Pengajuan Transfer - {{ $project->name }}</h2>
+                </div>
                 <div class="flex justify-end w-full md:w-auto">
                     <a href="{{ route('itemtransfer.order') }}"
                         class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md transition font-medium flex items-center gap-2">
                         <i class="fas fa-arrow-left"></i> Kembali
                     </a>
                 </div>
-            @endif
-        </div>
-
-        <button onclick="toggleModal('modalTambahPesanan')"
-            class="bg-[#FFB22C] hover:bg-orange-500 text-white font-medium text-sm py-3 px-4 rounded-md mb-6 flex items-center gap-2 transition duration-200">
-            <i class="fas fa-plus"></i> Buat Pengajuan Transfer
-        </button>
-
+            </div>
+        @else
+            {{-- Tampilan Staf (Tanpa Tombol) --}}
+            <div class="flex flex-col md:flex-row justify-between items-center mb-20 gap-4">
+                <div class="flex justify-start w-full md:w-auto">
+                    <h2 class="text-xl font-bold text-gray-800">Pengajuan Transfer - {{ $project->name }}</h2>
+                </div>
+            </div>
+        @endif
         {{-- Show & Search --}}
         <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
             <div class="text-gray-600">

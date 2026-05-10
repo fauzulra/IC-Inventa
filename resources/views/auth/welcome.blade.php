@@ -48,7 +48,7 @@
                                         d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
                             </div>
-                            <input type="text" name="username" id="username"
+                            <input type="text" name="username" id="username" required value="{{ old('username') }}"
                                 class="focus:ring-yellow-500 focus:border-yellow-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3 border">
                         </div>
                     </div>
@@ -63,14 +63,15 @@
                                         d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
                             </div>
-                            <input type="password" name="password" id="password"
+                            <input type="password" name="password" id="password" required
                                 class="focus:ring-yellow-500 focus:border-yellow-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3 border">
                         </div>
                     </div>
 
                     <div class="flex items-center justify-center">
                         <div class="text-sm">
-                            <a href="#" class="font-medium text-[#0065F8] hover:text-blue-800 underline">
+                            <a href="{{ route('password.request') }}"
+                                class="font-medium text-[#0065F8] hover:text-blue-800 underline">
                                 Lupa Password?
                             </a>
                         </div>
@@ -95,6 +96,47 @@
         </div>
     </div>
 
+    {{-- 1. Import Library SweetAlert2 via CDN --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    {{-- 2. Logika Pemanggilan SweetAlert --}}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+
+            // SKENARIO 1: Menangkap error validasi bawaan Laravel
+            @if ($errors->any())
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Login Gagal!',
+                    text: 'Username atau password yang Anda masukkan salah.',
+                    confirmButtonColor: '#8B4513',
+                    confirmButtonText: 'Coba Lagi'
+                });
+            @endif
+
+            // SKENARIO 2: Menangkap error kustom dari Controller (jika Anda pakai with('error', '...'))
+            @if (session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: '{{ session('error') }}',
+                    confirmButtonColor: '#8B4513',
+                    confirmButtonText: 'OK'
+                });
+            @endif
+
+            // SKENARIO 3: Menangkap pesan sukses (misal setelah reset password / logout)
+            @if (session('status'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('status') }}',
+                    confirmButtonColor: '#8B4513'
+                });
+            @endif
+
+        });
+    </script>
 </body>
 
 </html>

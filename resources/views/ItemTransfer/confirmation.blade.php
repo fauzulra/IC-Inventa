@@ -6,7 +6,7 @@
     <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md border border-gray-200 mt-6">
 
         {{-- Header & Tombol Kembali --}}
-        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-20 gap-4">
             <div class="flex justify-start w-full md:w-auto">
                 <h2 class="text-xl font-bold text-gray-800">
                     Konfirmasi Transfer {{ isset($project) ? '- ' . $project->name : 'Antar Proyek' }}

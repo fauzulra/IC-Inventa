@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Material;
 use App\Models\OutgoingGood;
 use App\Models\Project;
+use App\Models\IncomingGood;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -77,30 +78,28 @@ class OutgoingGoodController extends Controller
             'date_shipped'           => 'required|date',
         ]);
 
-        // // Mencegah pengiriman ke proyek asal
-        // if ($request->source_project_id == $request->destination_project_id) {
-        //     return redirect()->back()->with('error', 'Gagal! Proyek asal dan proyek tujuan tidak boleh sama.');
-        // }
-
         try {
             DB::beginTransaction();
 
+            // ==============================================================
+            // 1. PROSES BARANG KELUAR (PROYEK ASAL)
+            // ==============================================================
             $projectAsal = Project::findOrFail($request->source_project_id);
-            $material = $projectAsal->materials()->where('material_id', $request->material_id)->first();
+            $materialAsal = $projectAsal->materials()->where('material_id', $request->material_id)->first();
 
-            // Pengecekan Stok Pivot
-            if (!$material || $material->pivot->stock < $request->quantity) {
+            // Pengecekan Stok Pivot Proyek Asal
+            if (!$materialAsal || $materialAsal->pivot->stock < $request->quantity) {
                 return redirect()->back()
                     ->withInput()
                     ->with('error', 'Gagal! Sisa stok material di proyek ini tidak mencukupi.');
             }
 
-            // Kurangi stok di PIVOT
-            $projectAsal->materials()->updateExistingPivot($material->id, [
-                'stock' => $material->pivot->stock - $request->quantity
+            // Kurangi stok di PIVOT Proyek Asal
+            $projectAsal->materials()->updateExistingPivot($materialAsal->id, [
+                'stock' => $materialAsal->pivot->stock - $request->quantity
             ]);
 
-            // Simpan riwayat
+            // Simpan riwayat Barang Keluar
             OutgoingGood::create([
                 'source_project_id'      => $request->source_project_id,
                 'destination_project_id' => $request->destination_project_id,
@@ -109,8 +108,36 @@ class OutgoingGoodController extends Controller
                 'date_shipped'           => $request->date_shipped,
             ]);
 
+            // ==============================================================
+            // 2. PROSES OTOMATIS BARANG MASUK (PROYEK TUJUAN)
+            // ==============================================================
+            if ($request->source_project_id != $request->destination_project_id) {
+                
+                // Simpan riwayat Barang Masuk ke Proyek Tujuan
+                IncomingGood::create([
+                    'project_id'    => $request->destination_project_id,
+                    'material_id'   => $request->material_id,
+                    'supplier_id'   => null, // Null karena ini transfer internal, bukan dari supplier luar
+                    'quantity'      => $request->quantity,
+                    'date_received' => $request->date_shipped, // Tanggal masuk disamakan dengan tanggal dikirim
+                ]);
+
+                // Tambah stok di Pivot Proyek Tujuan
+                $projectTujuan = Project::findOrFail($request->destination_project_id);
+                $materialDiTujuan = $projectTujuan->materials()->where('material_id', $request->material_id)->first();
+
+                // Jika material sudah ada di proyek tujuan, tambahkan stoknya
+                if ($materialDiTujuan) {
+                    $newStock = $materialDiTujuan->pivot->stock + $request->quantity;
+                    $projectTujuan->materials()->updateExistingPivot($request->material_id, ['stock' => $newStock]);
+                } else {
+                    // Jika material belum pernah ada di proyek tujuan, lampirkan (attach) data baru
+                    $projectTujuan->materials()->attach($request->material_id, ['stock' => $request->quantity]);
+                }
+            }
+
             DB::commit();
-            return redirect()->back()->with('success', 'Barang keluar berhasil dicatat dan sisa stok proyek telah dikurangi!');
+            return redirect()->back()->with('success', 'Barang keluar berhasil dicatat & otomatis masuk ke Proyek Tujuan!');
 
         } catch (\Exception $e) {
             DB::rollBack();

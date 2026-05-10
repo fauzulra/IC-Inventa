@@ -1,10 +1,9 @@
-<!-- Kontainer Utama Sidebar -->
 <aside class="flex flex-col h-full bg-white overflow-hidden border-r border-gray-200">
 
-    <!-- Bagian Menu (Bisa di-scroll jika menu panjang) -->
     <nav class="flex-1 min-h-0 space-y-1 overflow-y-auto pb-4 custom-scrollbar">
+
         <a href="{{ route('dashboard') }}"
-            class="group flex items-center text-sm font-medium text-gray-800 {{ request()->routeIs('dashboard') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-50' }}">
+            class="group flex items-center text-sm font-medium text-gray-800 transition-colors duration-200 {{ request()->routeIs('dashboard') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-100' }}">
             <div class="flex items-center text-gray-600">
                 <div class="px-6 py-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -18,7 +17,7 @@
         </a>
 
         <a href="{{ route('project.index') }}"
-            class="group flex items-center text-sm font-medium text-gray-800 {{ request()->routeIs('project.*') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-50' }}">
+            class="group flex items-center text-sm font-medium text-gray-800 transition-colors duration-200 {{ request()->routeIs('project.*') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-100' }}">
             <div class="flex items-center text-gray-600">
                 <div class="px-6 py-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -32,7 +31,7 @@
         </a>
 
         <a href="{{ route('supplier.index') }}"
-            class="group flex items-center text-sm font-medium text-gray-800 {{ request()->routeIs('supplier.*') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-50' }}">
+            class="group flex items-center text-sm font-medium text-gray-800 transition-colors duration-200 {{ request()->routeIs('supplier.*') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-100' }}">
             <div class="flex items-center text-gray-600">
                 <div class="px-6 py-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -45,13 +44,9 @@
             </div>
         </a>
 
-        <!-- DROPDOWN: Material Item (HOVER BASED) -->
-        <!-- Tambahkan class "group/material" pada parent container -->
         <div class="group/material relative">
-
-            <!-- Hapus onclick, ganti button dengan div atau biarkan button tapi hapus scriptnya -->
             <button
-                class="w-full flex items-center justify-between text-sm font-medium text-gray-800 {{ request()->routeIs('material.*') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-50' }}">
+                class="w-full flex items-center justify-between text-sm font-medium text-gray-800 transition-colors duration-200 {{ request()->routeIs('material.*') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-200 group-hover/material:bg-gray-200' }}">
                 <div class="flex items-center text-gray-600">
                     <div class="px-6 py-2">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -63,7 +58,6 @@
                     <span class="font-medium">Material Item</span>
                 </div>
                 <div class="px-3 text-gray-500">
-                    <!-- Tambahkan group-hover/material:rotate-180 -->
                     <svg id="chevron-material" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                         fill="currentColor"
                         class="w-5 h-5 transition-transform duration-300 group-hover/material:rotate-180 {{ request()->routeIs('material.*') ? 'rotate-180' : '' }}">
@@ -74,17 +68,12 @@
                 </div>
             </button>
 
-            <!-- Submenu Items Material -->
-            <!--
-                1. Hapus max-h-0, opacity-0, dll yang berbasis JS.
-                2. Gunakan hidden dan group-hover/material:flex untuk menampilkan.
-                3. Jika ingin submenu tetap terbuka saat berada di halamannya, gabungkan logika request()->routeIs.
-            -->
             <div id="submenu-material"
                 class="flex-col bg-gray-50/50 overflow-hidden transition-all duration-300 ease-in-out {{ request()->routeIs('material.*') ? 'flex' : 'hidden group-hover/material:flex' }}">
 
+                {{-- PERBAIKAN: Tambahkan 'material.project.show' --}}
                 <a href="{{ route('material.index') }}"
-                    class="pl-4 text-sm font-medium {{ request()->routeIs('material.index') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-200' }}">
+                    class="pl-4 text-sm font-medium transition-colors duration-200 {{ request()->routeIs('material.index', 'material.project.show') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-200' }}">
                     <div class="flex items-center text-gray-600">
                         <div class="px-6 py-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -97,8 +86,9 @@
                     </div>
                 </a>
 
+                {{-- PERBAIKAN: Tambahkan 'material.order.show' --}}
                 <a href="{{ route('material.order') }}"
-                    class="pl-4 text-sm font-medium text-gray-800 {{ request()->routeIs('material.order') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-200' }}">
+                    class="pl-4 text-sm font-medium text-gray-800 transition-colors duration-200 {{ request()->routeIs('material.order', 'material.order.show') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-200' }}">
                     <div class="flex items-center text-gray-600">
                         <div class="px-6 py-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -111,8 +101,9 @@
                     </div>
                 </a>
 
+                {{-- PERBAIKAN: Tambahkan 'material.confirmation.show' --}}
                 <a href="{{ route('material.confirmation') }}"
-                    class="pl-4 text-sm font-medium text-gray-800 {{ request()->routeIs('material.confirmation') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-200' }}">
+                    class="pl-4 text-sm font-medium text-gray-800 transition-colors duration-200 {{ request()->routeIs('material.confirmation', 'material.confirmation.show') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-200' }}">
                     <div class="flex items-center text-gray-600">
                         <div class="px-6 py-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -124,89 +115,12 @@
                         <span class="font-medium">Konfirmasi</span>
                     </div>
                 </a>
-
             </div>
         </div>
-        <!-- END DROPDOWN -->
 
-        <!-- DROPDOWN: Material Item -->
-        {{-- <div>
-            <button onclick="toggleDropdown('submenu-material', 'chevron-material')"
-                class="w-full flex items-center justify-between text-sm font-medium text-gray-800 {{ request()->routeIs('material.*', 'order.*', 'confirmation.*') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-50' }}">
-                <div class="flex items-center text-gray-600">
-                    <div class="px-6 py-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-                        </svg>
-                    </div>
-                    <span class="font-medium">Material Item</span>
-                </div>
-                <div class="px-3 text-gray-500">
-                    <svg id="chevron-material" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                        fill="currentColor"
-                        class="w-5 h-5 transition-transform duration-300 {{ request()->routeIs('material.*', 'order.*') ? 'rotate-180' : '' }}">
-                        <path fill-rule="evenodd"
-                            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                            clip-rule="evenodd" />
-                    </svg>
-                </div>
-            </button>
-
-            <!-- Submenu Items Material -->
-            <div id="submenu-material"
-                class="flex flex-col bg-gray-50/50 overflow-hidden transition-all duration-300 ease-in-out {{ request()->routeIs('material.*', 'order.*', 'confirmation.*') ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0' }}">
-                <a href="{{ route('material.index') }}"
-                    class="pl-4 text-sm font-medium {{ request()->routeIs('material.index') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-200' }}">
-                    <div class="flex items-center text-gray-600">
-                        <div class="px-6 py-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-                            </svg>
-                        </div>
-                        <span class="font-medium">Data Master</span>
-                    </div>
-                </a>
-                <a href="{{ route('material.order') }}"
-                    class="pl-4 text-sm font-medium text-gray-800 {{ request()->routeIs('material.order') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-200' }}">
-                    <div class="flex items-center text-gray-600">
-                        <div class="px-6 py-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                            </svg>
-                        </div>
-                        <span class="font-medium">Pemesanan</span>
-                    </div>
-                </a>
-                <a href="{{ route('material.confirmation') }}"
-                    class="pl-4 text-sm font-medium text-gray-800 {{ request()->routeIs('material.confirmation') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-200' }}">
-                    <div class="flex items-center text-gray-600">
-                        <div class="px-6 py-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                            </svg>
-                        </div>
-                        <span class="font-medium">Konfirmasi</span>
-                    </div>
-                </a>
-            </div>
-        </div> --}}
-        <!-- END DROPDOWN -->
-
-        <!-- DROPDOWN: Transfer Barang (HOVER BASED) -->
-        <!-- Tambahkan class "group/transfer" pada parent container -->
         <div class="group/transfer relative">
-
-            <!-- Hapus onclick, ganti button dengan styling yang sama -->
             <button
-                class="w-full flex items-center justify-between text-sm font-medium text-gray-800 {{ request()->routeIs('itemtransfer.*') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-50' }}">
+                class="w-full flex items-center justify-between text-sm font-medium text-gray-800 transition-colors duration-200 {{ request()->routeIs('itemtransfer.*') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-200 group-hover/transfer:bg-gray-200' }}">
                 <div class="flex items-center text-gray-600">
                     <div class="px-6 py-2">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -218,7 +132,6 @@
                     <span class="font-medium">Transfer Barang</span>
                 </div>
                 <div class="px-3 text-gray-500">
-                    <!-- Tambahkan group-hover/transfer:rotate-180 -->
                     <svg id="chevron-transfer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                         fill="currentColor"
                         class="w-5 h-5 transition-transform duration-300 group-hover/transfer:rotate-180 {{ request()->routeIs('itemtransfer.*') ? 'rotate-180' : '' }}">
@@ -229,30 +142,28 @@
                 </div>
             </button>
 
-            <!-- Submenu Items Transfer Barang -->
-            <!--
-                1. Hapus max-h-0, opacity-0, dll yang berbasis JS.
-                2. Gunakan hidden dan group-hover/transfer:flex untuk menampilkan.
-            -->
             <div id="submenu-transfer"
                 class="flex-col bg-gray-50/50 overflow-hidden transition-all duration-300 ease-in-out {{ request()->routeIs('itemtransfer.*') ? 'flex' : 'hidden group-hover/transfer:flex' }}">
 
-                <a href="{{ route('itemtransfer.index') }}"
-                    class="pl-4 text-sm font-medium {{ request()->routeIs('itemtransfer.index') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-200' }}">
-                    <div class="flex items-center text-gray-600">
-                        <div class="px-6 py-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-                            </svg>
+                @if (auth()->user()->hasRole('admin'))
+                    <a href="{{ route('itemtransfer.index') }}"
+                        class="pl-4 text-sm font-medium transition-colors duration-200 {{ request()->routeIs('itemtransfer.index') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-200' }}">
+                        <div class="flex items-center text-gray-600">
+                            <div class="px-6 py-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+                                </svg>
+                            </div>
+                            <span class="font-medium">Data Master</span>
                         </div>
-                        <span class="font-medium">Data Master</span>
-                    </div>
-                </a>
+                    </a>
+                @endif
 
+                {{-- PERBAIKAN: Tambahkan 'itemtransfer.order.show' --}}
                 <a href="{{ route('itemtransfer.order') }}"
-                    class="pl-4 text-sm font-medium text-gray-800 {{ request()->routeIs('itemtransfer.order') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-200' }}">
+                    class="pl-4 text-sm font-medium text-gray-800 transition-colors duration-200 {{ request()->routeIs('itemtransfer.order', 'itemtransfer.order.show') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-200' }}">
                     <div class="flex items-center text-gray-600">
                         <div class="px-6 py-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -265,8 +176,9 @@
                     </div>
                 </a>
 
+                {{-- PERBAIKAN: Tambahkan 'itemtransfer.confirmation.show' --}}
                 <a href="{{ route('itemtransfer.confirmation') }}"
-                    class="pl-4 text-sm font-medium text-gray-800 {{ request()->routeIs('itemtransfer.confirmation') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-200' }}">
+                    class="pl-4 text-sm font-medium text-gray-800 transition-colors duration-200 {{ request()->routeIs('itemtransfer.confirmation', 'itemtransfer.confirmation.show') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-200' }}">
                     <div class="flex items-center text-gray-600">
                         <div class="px-6 py-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -280,87 +192,8 @@
                 </a>
             </div>
         </div>
-        <!-- END DROPDOWN -->
-
-        <!-- DROPDOWN: Transfer Barang -->
-        {{-- <div>
-            <button onclick="toggleDropdown('submenu-transfer', 'chevron-transfer')"
-                class="w-full flex items-center justify-between text-sm font-medium text-gray-800 {{ request()->routeIs('itemtransfer.*') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-50' }}">
-                <div class="flex items-center text-gray-600">
-                    <div class="px-6 py-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3" />
-                        </svg>
-                    </div>
-                    <span class="font-medium">Transfer Barang</span>
-                </div>
-                <div class="px-3 text-gray-500">
-                    <!-- Icon Panah (Chevron) untuk Transfer Barang -->
-                    <svg id="chevron-transfer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                        fill="currentColor"
-                        class="w-5 h-5 transition-transform duration-300 {{ request()->routeIs('itemtransfer.*') ? 'rotate-180' : '' }}">
-                        <path fill-rule="evenodd"
-                            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                            clip-rule="evenodd" />
-                    </svg>
-                </div>
-            </button>
-
-            <!-- Submenu Items Transfer Barang -->
-            <div id="submenu-transfer"
-                class="flex flex-col bg-gray-50/50 overflow-hidden transition-all duration-300 ease-in-out {{ request()->routeIs('itemtransfer.*') ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0' }}">
-
-                <a href="{{ route('itemtransfer.index') }}"
-                    class="pl-4 text-sm font-medium {{ request()->routeIs('itemtransfer.index') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-200' }}">
-                    <div class="flex items-center text-gray-600">
-                        <div class="px-6 py-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-                            </svg>
-                        </div>
-                        <span class="font-medium">Data Master</span>
-                    </div>
-                </a>
-
-                <!-- Ganti href dan routeIs dengan rute pemesanan transfer Anda -->
-                <a href="{{ route('itemtransfer.order') }}"
-                    class="pl-4 text-sm font-medium text-gray-800 {{ request()->routeIs('itemtransfer.order.*') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-200' }}">
-                    <div class="flex items-center text-gray-600">
-                        <div class="px-6 py-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                            </svg>
-                        </div>
-                        <span class="font-medium">Pemesanan</span>
-                    </div>
-                </a>
-
-                <!-- Ganti href dan routeIs dengan rute konfirmasi transfer Anda -->
-                <a href="{{ route('itemtransfer.confirmation') }}"
-                    class="pl-4 text-sm font-medium text-gray-800 {{ request()->routeIs('itemtransfer.confirmation.*') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-200' }}">
-                    <div class="flex items-center text-gray-600">
-                        <div class="px-6 py-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                            </svg>
-                        </div>
-                        <span class="font-medium">Konfirmasi</span>
-                    </div>
-                </a>
-            </div>
-        </div> --}}
-        <!-- END DROPDOWN -->
-
         <a href="{{ route('incominggood.index') }}"
-            class="group flex items-center text-sm font-medium text-gray-800 {{ request()->routeIs('incominggood.*') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-50' }}">
+            class="group flex items-center text-sm font-medium text-gray-800 transition-colors duration-200 {{ request()->routeIs('incominggood.*') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-100' }}">
             <div class="flex items-center text-gray-600">
                 <div class="px-6 py-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -374,7 +207,7 @@
         </a>
 
         <a href="{{ route('outgoinggood.index') }}"
-            class="group flex items-center text-sm font-medium text-gray-800 {{ request()->routeIs('outgoinggood.*') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-50' }}">
+            class="group flex items-center text-sm font-medium text-gray-800 transition-colors duration-200 {{ request()->routeIs('outgoinggood.*') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-100' }}">
             <div class="flex items-center text-gray-600">
                 <div class="px-6 py-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -387,23 +220,16 @@
             </div>
         </a>
 
-
-
     </nav>
 
-    <!-- Bagian Footer Sidebar (Akan selalu menempel di bawah) -->
     <div class="shrink-0 border-t border-gray-200 p-4 bg-white">
         <a href="#" class="flex items-center mb-4">
             <div
                 class="shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 text-gray-600 font-bold uppercase">
-                {{-- Mengambil 2 huruf pertama dari nama user sebagai inisial --}}
                 {{ substr(auth()->user()->name, 0, 2) }}
             </div>
             <div class="ml-4">
-                {{-- Nama otomatis sesuai akun yang login --}}
                 <p class="text-sm font-bold text-gray-900">{{ ucwords(auth()->user()->name) }}</p>
-
-                {{-- Role otomatis dari Spatie, hilangkan underscore (_) agar staf_lapangan jadi Staf Lapangan --}}
                 <p class="text-xs font-medium text-gray-500 capitalize">
                     {{ str_replace('_', ' ', auth()->user()->roles->first()->name ?? 'User') }}
                 </p>
@@ -421,6 +247,7 @@
 </aside>
 
 <script>
+    // Script ini opsional jika Anda ingin kembalikan fungsi klik manual di masa depan
     function toggleDropdown(menuId, iconId) {
         const menu = document.getElementById(menuId);
         const icon = document.getElementById(iconId);

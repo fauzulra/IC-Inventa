@@ -33,25 +33,43 @@
                 Silakan masukkan alamat email yang terdaftar pada akun Anda.
             </p>
 
-            <form action="" method="POST">
+            {{-- Notifikasi Sukses --}}
+            @if (session('status'))
+                <div class="mb-4 font-medium text-sm text-green-600 bg-green-100 p-3 rounded-md text-center">
+                    {{ session('status') }}
+                </div>
+            @endif
+
+            {{-- Notifikasi Error --}}
+            @error('email')
+                <div class="mb-4 font-medium text-sm text-red-600 bg-red-100 p-3 rounded-md text-center">
+                    {{ $message }}
+                </div>
+            @enderror
+
+            {{-- 1. Tambahkan route('password.email') di action --}}
+            <form action="{{ route('password.email') }}" method="POST">
                 @csrf
 
                 <div class="mb-8 relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-600">
                         <i class="far fa-envelope text-lg"></i>
                     </div>
-                    <input type="email" name="email" required
-                        class="w-full pl-10 pr-3 py-3 border border-gray-500 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition"
-                        placeholder="">
+
+                    {{-- 2. Tambahkan value old('email') agar jika salah, teksnya tidak hilang --}}
+                    <input type="email" name="email" required value="{{ old('email') }}"
+                        class="w-full pl-10 pr-3 py-3 border @error('email') border-red-500 @else border-gray-500 @enderror rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition"
+                        placeholder="Contoh: andi@gmail.com">
                 </div>
 
                 <button type="submit"
                     class="w-full bg-[#7C3F2B] hover:bg-[#633222] text-white font-semibold py-3 rounded-lg shadow-md transition duration-200">
-                    Kirim
+                    Kirim Link Reset
                 </button>
 
                 <div class="mt-5 text-center">
-                    <a href="#" class="text-sm font-medium text-[#0065F8] hover:text-blue-800 underline">
+                    <a href="{{ route('login') }}"
+                        class="text-sm font-medium text-[#0065F8] hover:text-blue-800 underline">
                         Kembali ke Halaman Login
                     </a>
                 </div>

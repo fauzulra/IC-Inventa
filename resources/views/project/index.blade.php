@@ -15,6 +15,7 @@
         @else
             <h2 class="text-xl font-semibold text-gray-800 mb-20">Daftar Proyek PT CIPTATAMA GRIYA PRIMA</h2>
         @endif
+
         {{-- Show & Search --}}
         <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
             <div class="text-gray-600">
@@ -35,6 +36,7 @@
                 </div>
             </div>
         </div>
+
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse border border-gray-200">
                 <thead class="bg-gray-50">
@@ -45,51 +47,55 @@
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Nama Proyek</th>
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Lokasi</th>
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Logistik</th>
-                        <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700 text-center">Status
-                        </th>
-                        <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700 text-center">Aksi
-                        </th>
+                        <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700 text-center">Status</th>
+                        <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700 text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody" class="text-sm text-gray-600">
                     @forelse ($projects as $project)
                         <tr class="hover:bg-gray-50 transition">
                             <td class="border border-gray-200 px-4 py-1.5 text-center">{{ $loop->iteration }}</td>
-
                             <td class="border border-gray-200 px-4 py-1.5">{{ $project->code }}</td>
                             <td class="border border-gray-200 px-4 py-1.5">{{ $project->name }}</td>
                             <td class="border border-gray-200 px-4 py-1.5">{{ $project->location }}</td>
                             <td class="border border-gray-200 px-4 py-1.5">{{ $project->logistics_contact }}</td>
 
+                            {{-- Kolom Status --}}
                             <td class="border border-gray-200 px-4 py-1.5 text-center">
-                                @if ($project->status === 'selesai')
+                                @if (auth()->user()->hasRole('admin'))
+                                    {{-- Bisa diklik Admin --}}
                                     <button onclick="openStatusModal('{{ $project->name }}')"
-                                        class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition transform hover:scale-105 shadow-sm">
-                                        Selesai
+                                        class="{{ $project->status === 'selesai' ? 'bg-green-500 hover:bg-green-600' : 'bg-orange-400 hover:bg-orange-500' }} text-white px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition transform hover:scale-105 shadow-sm">
+                                        {{ ucfirst($project->status) }}
                                     </button>
                                 @else
-                                    <button onclick="openStatusModal('{{ $project->name }}')"
-                                        class="bg-orange-400 hover:bg-orange-500 text-white px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition transform hover:scale-105 shadow-sm">
-                                        Berjalan
-                                    </button>
+                                    {{-- Terkunci untuk User Biasa --}}
+                                    <span
+                                        class="bg-gray-100 text-gray-400 border border-gray-200 px-3 py-1.5 rounded-md text-xs font-semibold flex items-center justify-center gap-1 cursor-not-allowed">
+                                        <i class="fas fa-lock text-[10px]"></i> {{ ucfirst($project->status) }}
+                                    </span>
                                 @endif
                             </td>
 
+                            {{-- Kolom Aksi --}}
                             <td class="border border-gray-200 px-4 py-1.5 text-center">
-                                <div class="flex justify-center gap-2">
-                                    {{-- Tombol Edit --}}
-                                    <button
-                                        onclick="openEditModal('{{ $project->id }}', '{{ $project->name }}', '{{ $project->location }}', '{{ $project->logistics_contact }}')"
-                                        class="text-orange-400 border border-orange-400 hover:bg-orange-50 rounded p-1 w-8 h-8 flex items-center justify-center transition">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-
-                                    {{-- Tombol Delete --}}
-                                    <button onclick="openDeleteModal('{{ $project->id }}')"
-                                        class="text-red-500 border border-red-500 hover:bg-red-50 rounded p-1 w-8 h-8 flex items-center justify-center transition">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
+                                @if (auth()->user()->hasRole('admin'))
+                                    <div class="flex justify-center gap-2">
+                                        <button
+                                            onclick="openEditModal('{{ $project->id }}', '{{ $project->name }}', '{{ $project->location }}', '{{ $project->logistics_contact }}')"
+                                            class="text-orange-400 border border-orange-400 hover:bg-orange-50 rounded p-1 w-8 h-8 flex items-center justify-center transition">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button onclick="openDeleteModal('{{ $project->id }}')"
+                                            class="text-red-500 border border-red-500 hover:bg-red-50 rounded p-1 w-8 h-8 flex items-center justify-center transition">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                @else
+                                    <span class="text-gray-400 italic text-xs flex items-center justify-center gap-1">
+                                        <i class="fas fa-lock text-[10px]"></i> Dikunci
+                                    </span>
+                                @endif
                             </td>
                         </tr>
                     @empty
@@ -130,26 +136,24 @@
                     <div class="flex justify-between items-center">
                         <h3 class="text-lg leading-6 font-bold text-gray-900">Tambah Data Proyek</h3>
                         <button onclick="toggleModal('modalTambahProyek')"
-                            class="text-gray-400 hover:text-gray-500 focus:outline-none"><i
-                                class="fas fa-times"></i></button>
+                            class="text-gray-400 hover:text-gray-500 focus:outline-none">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                 </div>
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
                     <form action="{{ route('project.store') }}" method="POST">
                         @csrf
-
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Nama Proyek</label>
                             <input type="text" name="name" placeholder="Contoh: Cipta Piayu Village" required
                                 class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                         </div>
-
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Lokasi</label>
                             <input type="text" name="location" placeholder="Contoh: Piayu" required
                                 class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                         </div>
-
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Logistik (Nama & Kontak)</label>
                             <div class="relative">
@@ -167,30 +171,27 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="flex flex-row-reverse">
                             <button type="submit"
-                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#FFB22C] text-base font-medium text-white hover:bg-orange-500 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Simpan</button>
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#FFB22C] text-base font-medium text-white hover:bg-orange-500 sm:ml-3 sm:w-auto sm:text-sm">Simpan</button>
                             <button type="button" onclick="toggleModal('modalTambahProyek')"
-                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
     {{-- Modal Update Status Proyek --}}
     <div id="modalUpdateStatusProyek" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title"
         role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-
             <div onclick="toggleModal('modalUpdateStatusProyek')"
                 class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
             <div
                 class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-100">
                     <div class="flex justify-between items-center">
                         <h3 class="text-lg leading-6 font-bold text-gray-900">Update Status Proyek</h3>
@@ -200,7 +201,6 @@
                         </button>
                     </div>
                 </div>
-
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
                     <form>
                         <div class="mb-4">
@@ -208,11 +208,9 @@
                             <input type="text" id="statusProyekName" readonly
                                 class="bg-gray-100 shadow appearance-none border rounded w-full py-2 px-3 text-gray-600 leading-tight focus:outline-none">
                         </div>
-
                         <div class="mb-6">
                             <label class="block text-gray-700 text-sm font-bold mb-3">Pilih Status:</label>
                             <div class="space-y-3">
-
                                 <label
                                     class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-orange-50 transition group">
                                     <input type="radio" name="status_proyek" value="Berjalan"
@@ -221,7 +219,6 @@
                                     <span
                                         class="bg-orange-400 text-white px-3 py-1.5 rounded-md text-xs font-semibold">Aktif</span>
                                 </label>
-
                                 <label
                                     class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-green-50 transition group">
                                     <input type="radio" name="status_proyek" value="Selesai"
@@ -230,25 +227,21 @@
                                     <span
                                         class="bg-green-500 text-white px-3 py-1.5 rounded-md text-xs font-semibold">Selesai</span>
                                 </label>
-
                             </div>
                         </div>
-
                         <div class="flex flex-row-reverse">
                             <button type="submit"
-                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#FFB22C] text-base font-medium text-white hover:bg-orange-500 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
-                                Simpan Status
-                            </button>
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#FFB22C] text-base font-medium text-white hover:bg-orange-500 sm:ml-3 sm:w-auto sm:text-sm">Simpan
+                                Status</button>
                             <button type="button" onclick="toggleModal('modalUpdateStatusProyek')"
-                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                                Batal
-                            </button>
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
     {{-- MODAL EDIT PROYEK --}}
     <div id="modalEditProyek" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title"
         role="dialog" aria-modal="true">
@@ -270,18 +263,17 @@
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
                     <form id="editProjectForm" method="POST">
                         @csrf
-                        @method('PUT') <div class="mb-4">
+                        @method('PUT')
+                        <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Nama Proyek</label>
                             <input type="text" id="edit_name" name="name" required
                                 class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                         </div>
-
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Lokasi</label>
                             <input type="text" id="edit_location" name="location" required
                                 class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                         </div>
-
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Logistik (Nama & Kontak)</label>
                             <div class="relative">
@@ -299,18 +291,18 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="flex flex-row-reverse">
                             <button type="submit"
-                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#FFB22C] text-base font-medium text-white hover:bg-orange-500 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Update</button>
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#FFB22C] text-base font-medium text-white hover:bg-orange-500 sm:ml-3 sm:w-auto sm:text-sm">Update</button>
                             <button type="button" onclick="toggleModal('modalEditProyek')"
-                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
     {{-- MODAL DELETE PROYEK --}}
     <div id="modalDeleteProyek" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title"
         role="dialog" aria-modal="true">
@@ -328,58 +320,47 @@
                         tidak dapat dibatalkan.</p>
                     <form id="deleteProjectForm" method="POST">
                         @csrf
-                        @method('DELETE') <div class="flex flex-row-reverse">
+                        @method('DELETE')
+                        <div class="flex flex-row-reverse">
                             <button type="submit"
-                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Hapus</button>
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 sm:ml-3 sm:w-auto sm:text-sm">Hapus</button>
                             <button type="button" onclick="toggleModal('modalDeleteProyek')"
-                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-
 @endsection
 
 @section('script')
     <script>
-        // Toggle Modal General
         function toggleModal(modalID) {
             document.getElementById(modalID).classList.toggle("hidden");
         }
 
-        // Open Status Modal with Project Name
         function openStatusModal(proyekName) {
             document.getElementById('statusProyekName').value = proyekName;
             toggleModal('modalUpdateStatusProyek');
         }
 
-        // Fungsi untuk membuka Modal Edit dan mengisi nilainya
         function openEditModal(id, name, location, contact) {
-            // Setup URL form action
             let form = document.getElementById('editProjectForm');
-            form.action = `/project/${id}`; // Sesuaikan path routing jika berbeda
-
-            // Isi value ke input
+            form.action = `/project/${id}`;
             document.getElementById('edit_name').value = name;
             document.getElementById('edit_location').value = location;
             document.getElementById('edit_logistics_contact').value = contact;
-
-            // Buka Modal
             toggleModal('modalEditProyek');
         }
 
-        // Fungsi untuk membuka Modal Delete
         function openDeleteModal(id) {
             let form = document.getElementById('deleteProjectForm');
-            form.action = `/project/${id}`; // Sesuaikan path routing jika berbeda
-
-            // Buka Modal
+            form.action = `/project/${id}`;
             toggleModal('modalDeleteProyek');
         }
     </script>
-
     @include('layout.script')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 @endsection
+    

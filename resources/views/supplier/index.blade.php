@@ -51,28 +51,34 @@
                     @forelse ($suppliers as $supplier)
                         <tr class="hover:bg-gray-50 transition">
                             <td class="border border-gray-200 px-4 py-1.5 text-center">{{ $loop->iteration }}</td>
-
                             <td class="border border-gray-200 px-4 py-1.5">{{ $supplier->name }}</td>
-
                             <td class="border border-gray-200 px-4 py-1.5">
                                 {{ ucwords($supplier->description) ?? '-' }}
                             </td>
 
                             <td class="border border-gray-200 px-4 py-1.5 text-center">
-                                <div class="flex justify-center gap-2">
-                                    {{-- Tombol Edit --}}
-                                    <button
-                                        onclick="openEditModal('{{ $supplier->id }}', '{{ $supplier->name }}', '{{ $supplier->description }}', '{{ $supplier->phone }}', '{{ $supplier->address }}')"
-                                        class="text-orange-400 border border-orange-400 hover:bg-orange-50 rounded p-1 w-8 h-8 flex items-center justify-center transition">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
+                                @if (auth()->user()->hasRole('admin'))
+                                    <div class="flex justify-center gap-2">
+                                        {{-- Tombol Edit --}}
+                                        <button
+                                            onclick="openEditModal('{{ $supplier->id }}', '{{ $supplier->name }}', '{{ $supplier->description }}', '{{ $supplier->phone }}', '{{ $supplier->address }}')"
+                                            class="text-orange-400 border border-orange-400 hover:bg-orange-50 rounded p-1 w-8 h-8 flex items-center justify-center transition">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
 
-                                    {{-- Tombol Delete --}}
-                                    <button onclick="openDeleteModal('{{ $supplier->id }}')"
-                                        class="text-red-500 border border-red-500 hover:bg-red-50 rounded p-1 w-8 h-8 flex items-center justify-center transition">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
+                                        {{-- Tombol Delete --}}
+                                        <button onclick="openDeleteModal('{{ $supplier->id }}')"
+                                            class="text-red-500 border border-red-500 hover:bg-red-50 rounded p-1 w-8 h-8 flex items-center justify-center transition">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                @else
+                                    {{-- Tampilan Terkunci untuk Non-Admin --}}
+                                    <span
+                                        class="text-gray-400 italic text-xs flex items-center justify-center gap-1 cursor-not-allowed">
+                                        <i class="fas fa-lock text-[10px]"></i> Dikunci
+                                    </span>
+                                @endif
                             </td>
                         </tr>
                     @empty
@@ -85,6 +91,7 @@
                 </tbody>
             </table>
         </div>
+
         {{-- Pagination --}}
         <div class="flex justify-center items-center mt-6 gap-2">
             <button id="prevBtn"
@@ -98,19 +105,16 @@
             </button>
         </div>
     </div>
+
     {{-- Modal tambah Data --}}
     <div id="modalTambahPemasok" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title"
         role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-
             <div onclick="toggleModal('modalTambahPemasok')"
                 class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
             <div
                 class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-100">
                     <div class="flex justify-between items-center">
                         <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">
@@ -126,31 +130,26 @@
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
                     <form action="{{ route('supplier.store') }}" method="POST">
                         @csrf
-
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Nama Pemasok</label>
                             <input type="text" name="name" placeholder="Contoh: PT. Sumber Rejeki" required
                                 class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                         </div>
-
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Deskripsi</label>
                             <input type="text" name="description" placeholder="Contoh: Suplier Pasir & Semen"
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                         </div>
-
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">No. Telepon</label>
                             <input type="text" name="phone" placeholder="Contoh: 0812-3456-7890"
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                         </div>
-
                         <div class="mb-6">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Alamat</label>
                             <textarea name="address" rows="3" placeholder="Masukkan alamat lengkap disini..."
                                 class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent"></textarea>
                         </div>
-
                         <div class="flex flex-row-reverse">
                             <button type="submit"
                                 class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#FFB22C] text-base font-medium text-white hover:bg-orange-500 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
@@ -166,6 +165,7 @@
             </div>
         </div>
     </div>
+
     {{-- MODAL EDIT PEMASOK --}}
     <div id="modalEditPemasok" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title"
         role="dialog" aria-modal="true">
@@ -188,31 +188,26 @@
                     <form id="editSupplierForm" method="POST">
                         @csrf
                         @method('PUT')
-
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Nama Pemasok</label>
                             <input type="text" id="edit_name" name="name" required
                                 class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                         </div>
-
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Deskripsi</label>
                             <input type="text" id="edit_description" name="description"
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                         </div>
-
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">No. Telepon</label>
                             <input type="text" id="edit_phone" name="phone"
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                         </div>
-
                         <div class="mb-6">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Alamat</label>
                             <textarea id="edit_address" name="address" rows="3"
                                 class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent"></textarea>
                         </div>
-
                         <div class="flex flex-row-reverse">
                             <button type="submit"
                                 class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#FFB22C] text-base font-medium text-white hover:bg-orange-500 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Update</button>
@@ -255,16 +250,16 @@
         </div>
     </div>
 @endsection
+
 @section('script')
     <script>
         function toggleModal(modalID) {
             document.getElementById(modalID).classList.toggle("hidden");
         }
 
-        // Fungsi membuka Modal Edit
         function openEditModal(id, name, description, phone, address) {
             let form = document.getElementById('editSupplierForm');
-            form.action = `/supplier/${id}`; // Pastikan URL sesuai dengan nama route Anda
+            form.action = `/supplier/${id}`;
 
             document.getElementById('edit_name').value = name;
             document.getElementById('edit_description').value = description || '';
@@ -274,10 +269,9 @@
             toggleModal('modalEditPemasok');
         }
 
-        // Fungsi membuka Modal Delete
         function openDeleteModal(id) {
             let form = document.getElementById('deleteSupplierForm');
-            form.action = `/supplier/${id}`; // Pastikan URL sesuai dengan nama route Anda
+            form.action = `/supplier/${id}`;
 
             toggleModal('modalDeletePemasok');
         }
