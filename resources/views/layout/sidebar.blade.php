@@ -220,6 +220,23 @@
             </div>
         </a>
 
+        @if (auth()->user()->hasRole('admin'))
+            <a href="{{ route('users.index') }}"
+                class="group flex items-center text-sm font-medium text-gray-800 transition-colors duration-200 {{ request()->routeIs('users.*') ? 'bg-[#D9D9D9]' : 'hover:bg-gray-100' }}">
+                <div class="flex items-center text-gray-600">
+                    <div class="px-6 py-2">
+                        <!-- Ikon User Edit / Pengguna -->
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                        </svg>
+                    </div>
+                    <span class="font-medium">Kelola Akun</span>
+                </div>
+            </a>
+        @endif
+
     </nav>
 
     <div class="shrink-0 border-t border-gray-200 p-4 bg-white">

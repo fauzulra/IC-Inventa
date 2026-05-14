@@ -88,23 +88,37 @@
                                     } elseif (in_array($statusLow, ['dibatalkan', 'ditolak'])) {
                                         $btnColor = 'bg-red-500'; // Final
                                     }
+
+                                    // Cek apakah status sudah final
+                                    $isFinal = in_array($statusLow, ['selesai', 'diterima', 'dibatalkan', 'ditolak']);
                                 @endphp
 
-                                {{-- VALIDASI: Gunakan array berisi huruf kecil semua --}}
-                                @if (in_array($statusLow, ['selesai', 'diterima', 'dibatalkan', 'ditolak']))
-                                    <span
-                                        class="{{ $btnColor }} text-white px-3 py-1.5 rounded-md text-xs font-semibold shadow-sm inline-block cursor-not-allowed opacity-90"
-                                        title="Status sudah final dan dikunci">
-                                        <i class="fas fa-lock mr-1"></i> {{ ucfirst($transfer->status) }}
-                                    </span>
+                                {{-- VALIDASI 1: Apakah user adalah Logistik? --}}
+                                @if (auth()->user()->hasRole('logistik'))
+                                    {{-- Jika Logistik, cek apakah statusnya sudah Final --}}
+                                    @if ($isFinal)
+                                        <span
+                                            class="{{ $btnColor }} text-white px-3 py-1.5 rounded-md text-xs font-semibold shadow-sm inline-block cursor-not-allowed opacity-90"
+                                            title="Status sudah final dan dikunci">
+                                            <i class="fas fa-lock mr-1"></i> {{ ucfirst($transfer->status) }}
+                                        </span>
+                                    @else
+                                        {{-- Jika belum Final, Logistik BISA klik untuk ubah --}}
+                                        <button
+                                            onclick="openStatusModal('{{ $transfer->id }}', '{{ $transfer->material ? $transfer->material->name : 'Item' }}')"
+                                            class="{{ $btnColor }} text-white px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition transform hover:scale-105 shadow-sm"
+                                            title="Klik untuk ubah status">
+                                            {{ ucfirst($transfer->status) }}
+                                        </button>
+                                    @endif
                                 @else
-                                    <button
-                                        onclick="openStatusModal('{{ $transfer->id }}', '{{ $transfer->material ? $transfer->material->name : 'Item' }}')"
-                                        class="{{ $btnColor }} text-white px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition transform hover:scale-105 shadow-sm"
-                                        title="Klik untuk ubah status">
+                                    {{-- VALIDASI 2: Jika BUKAN Logistik (Admin / Staff), tampilkan sebagai teks biasa (TIDAK BISA DIKLIK) --}}
+                                    <span
+                                        class="{{ str_replace('hover:', '', $btnColor) }} text-white px-3 py-1.5 rounded-md text-xs font-semibold shadow-sm inline-block cursor-default">
                                         {{ ucfirst($transfer->status) }}
-                                    </button>
+                                    </span>
                                 @endif
+
                             </td>
                         </tr>
                     @empty

@@ -82,7 +82,7 @@
                             Log In
                         </button>
                     </div>
-                    <div class="flex items-center justify-center">
+                    {{-- <div class="flex items-center justify-center">
                         <div class="text-sm">
                             <span class="font-medium text-gray-600">Belum punya akun?</span>
                             <a href="{{ route('register') }}"
@@ -90,7 +90,7 @@
                                 Daftar disini
                             </a>
                         </div>
-                    </div>
+                    </div> --}}
                 </form>
             </div>
         </div>
