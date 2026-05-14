@@ -46,7 +46,6 @@
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">ID Proyek</th>
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Nama Proyek</th>
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Lokasi</th>
-                        <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Logistik</th>
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700 text-center">Status</th>
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700 text-center">Aksi</th>
                     </tr>
@@ -58,7 +57,6 @@
                             <td class="border border-gray-200 px-4 py-1.5">{{ $project->code }}</td>
                             <td class="border border-gray-200 px-4 py-1.5">{{ $project->name }}</td>
                             <td class="border border-gray-200 px-4 py-1.5">{{ $project->location }}</td>
-                            <td class="border border-gray-200 px-4 py-1.5">{{ $project->logistics_contact }}</td>
 
                             {{-- Kolom Status --}}
                             <td class="border border-gray-200 px-4 py-1.5 text-center">
@@ -153,23 +151,6 @@
                             <label class="block text-gray-700 text-sm font-bold mb-2">Lokasi</label>
                             <input type="text" name="location" placeholder="Contoh: Piayu" required
                                 class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
-                        </div>
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Logistik (Nama & Kontak)</label>
-                            <div class="relative">
-                                <select name="logistics_contact" required
-                                    class="shadow appearance-none border rounded w-full py-2 pl-3 pr-10 text-gray-700 leading-normal focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent bg-white">
-                                    <option value="" disabled selected>Pilih Logistik...</option>
-                                    <option value="Seno – 0813 6421 9203">Seno – 0813 6421 9203</option>
-                                    <option value="Ryan Sinaga – 0858 3735 0411">Ryan Sinaga – 0858 3735 0411</option>
-                                    <option value="Dhuha – 0895 6036 81241">Dhuha – 0895 6036 81241</option>
-                                    <option value="Retno Diaz – 0813 6411 9665">Retno Diaz – 0813 6411 9665</option>
-                                </select>
-                                <div
-                                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
-                                    <i class="fas fa-chevron-down text-xs"></i>
-                                </div>
-                            </div>
                         </div>
                         <div class="flex flex-row-reverse">
                             <button type="submit"
@@ -363,4 +344,3 @@
     @include('layout.script')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 @endsection
-    

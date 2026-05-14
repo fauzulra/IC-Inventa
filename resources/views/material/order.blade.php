@@ -148,14 +148,35 @@
                     <form action="{{ route('material.order.store') }}" method="POST">
                         @csrf
 
-                        <!-- HIDDEN INPUT PROYEK ID -->
                         <input type="hidden" name="project_id" value="{{ $project->id }}">
 
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Nama Item / Material</label>
-                            <input type="text" name="name" placeholder="Contoh: Triplek 9mm..." required
-                                value="{{ old('name') }}"
-                                class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
+                            <div class="flex gap-2">
+                                <input type="text" name="name" id="input_material_name"
+                                    placeholder="Contoh: Triplek 9mm..." required value="{{ old('name') }}"
+                                    class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
+
+                                <button type="button" onclick="toggleModal('modalCariMaterial')"
+                                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded shadow transition duration-200 flex items-center gap-2">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4 mb-4">
+                            <div class="w-1/2">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Kuantitas</label>
+                                <input type="number" name="quantity" placeholder="0" required min="1"
+                                    value="{{ old('quantity') }}"
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
+                            </div>
+                            <div class="w-1/2">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Satuan</label>
+                                <input type="text" name="unit" id="input_material_unit"
+                                    placeholder="Pcs / Kg / Lbr" required value="{{ old('unit') }}"
+                                    class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
+                            </div>
                         </div>
 
                         <div class="flex gap-4 mb-4">
@@ -201,12 +222,97 @@
             </div>
         </div>
     </div>
+
+    {{-- MODAL CARI MATERIAL --}}
+    <div id="modalCariMaterial" class="fixed inset-0 z-[60] hidden overflow-y-auto" aria-labelledby="modal-title"
+        role="dialog" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div onclick="toggleModal('modalCariMaterial')"
+                class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+
+                <div class="bg-gray-50 px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg leading-6 font-bold text-gray-900">Cari Master Material</h3>
+                        <button type="button" onclick="toggleModal('modalCariMaterial')"
+                            class="text-gray-400 hover:text-gray-500"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+
+                <div class="bg-white px-4 pt-4 pb-4 sm:p-6">
+                    {{-- Input Pencarian --}}
+                    <div class="relative mb-4">
+                        <input type="text" id="searchMaterialInput" onkeyup="filterMaterialList()"
+                            placeholder="Ketik nama material..."
+                            class="shadow-sm border border-gray-300 rounded-md w-full py-2 pl-10 pr-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                            <i class="fas fa-search"></i>
+                        </div>
+                    </div>
+
+                    {{-- Daftar Material --}}
+                    <div class="max-h-60 overflow-y-auto custom-scrollbar border border-gray-100 rounded-md">
+                        <ul id="materialList" class="divide-y divide-gray-100">
+                            @if (isset($materials) && $materials->count() > 0)
+                                @foreach ($materials as $mat)
+                                    <li class="material-item">
+                                        <button type="button"
+                                            onclick="pilihMaterial('{{ $mat->name }}', '{{ $mat->unit }}')"
+                                            class="w-full text-left px-4 py-3 hover:bg-blue-50 transition focus:outline-none focus:bg-blue-50 group">
+                                            <div class="font-medium text-gray-800 group-hover:text-blue-700">
+                                                {{ ucwords($mat->name) }}</div>
+                                            <div class="text-xs text-gray-500">Satuan: {{ ucwords($mat->unit) }}</div>
+                                        </button>
+                                    </li>
+                                @endforeach
+                            @else
+                                <li class="px-4 py-3 text-sm text-gray-500 text-center">Belum ada master material.</li>
+                            @endif
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 flex flex-row-reverse">
+                    <button type="button" onclick="toggleModal('modalCariMaterial')"
+                        class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:w-auto sm:text-sm">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('script')
     <script>
         function toggleModal(modalID) {
             document.getElementById(modalID).classList.toggle("hidden");
+        }
+
+        // Fungsi untuk memilih material dan mengisi input form
+        function pilihMaterial(name, unit) {
+            document.getElementById('input_material_name').value = name;
+            document.getElementById('input_material_unit').value = unit;
+
+            // Tutup modal pencarian
+            toggleModal('modalCariMaterial');
+        }
+
+        // Fungsi untuk memfilter list material saat diketik (Live Search)
+        function filterMaterialList() {
+            let input = document.getElementById("searchMaterialInput").value.toLowerCase();
+            let items = document.querySelectorAll(".material-item");
+
+            items.forEach(function(item) {
+                let text = item.innerText.toLowerCase();
+                if (text.includes(input)) {
+                    item.style.display = "block";
+                } else {
+                    item.style.display = "none";
+                }
+            });
         }
     </script>
     @include('layout.script')

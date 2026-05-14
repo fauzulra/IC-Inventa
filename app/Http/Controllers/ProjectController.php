@@ -19,7 +19,6 @@ class ProjectController extends Controller
         $request->validate([
             'name'              => 'required|string|max:255',
             'location'          => 'required|string|max:255',
-            'logistics_contact' => 'required|string|max:255',
         ]);
 
         // 2. Generate Inisial Nama Proyek (Misal: "Cipta Piayu" -> "CP")

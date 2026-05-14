@@ -23,12 +23,19 @@
                 <i class="fas fa-plus"></i> Tambah Material
             </button>
         @else
-            <div class="flex justify-between items-center mb-20">
-                <h2 class="text-xl font-semibold text-gray-800">Daftar Material - {{ $project->name }}</h2>
-
+            <div class="flex flex-col md:flex-row justify-between items-center mb-20 gap-4">
+                <div class="flex justify-start w-full md:w-auto">
+                    <h2 class="text-xl font-bold text-gray-800">Daftar Material - {{ $project->name }}</h2>
+                </div>
+                <div class="flex justify-end w-full md:w-auto">
+                    {{-- Tambahkan parameter ?browse=true agar controller tahu ini klik dari tombol --}}
+                    <a href="{{ route('material.index', ['browse' => 'true']) }}"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition font-medium flex items-center gap-2">
+                        <i class="fas fa-eye"></i> Lihat Proyek Lain
+                    </a>
+                </div>
             </div>
         @endif
-
         {{-- Show & Search --}}
         <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
             <div class="text-gray-600">
