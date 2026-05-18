@@ -33,17 +33,6 @@
                 Silakan buat password baru Anda. Pastikan password mudah diingat namun sulit ditebak.
             </p>
 
-            {{-- Notifikasi Error Global --}}
-            @if ($errors->any())
-                <div class="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md">
-                    <ul class="list-disc list-inside text-sm">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
             {{-- Form memanggil route update password --}}
             <form action="{{ route('password.update') }}" method="POST">
                 @csrf
@@ -99,8 +88,12 @@
         </div>
     </div>
 
-    {{-- Script untuk tombol mata (lihat password) --}}
+    {{-- Import Library SweetAlert2 via CDN --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    {{-- Script Gabungan (Tombol Mata & SweetAlert) --}}
     <script>
+        // Fungsi untuk tombol mata (lihat password)
         function togglePassword(inputId, iconId) {
             const input = document.getElementById(inputId);
             const icon = document.getElementById(iconId);
@@ -115,6 +108,34 @@
                 icon.classList.add("fa-eye-slash");
             }
         }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Menangkap error validasi (Misal: Password kurang dari 8 karakter atau tidak cocok)
+            @if ($errors->any())
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Menyimpan!',
+                    // Mengambil pesan error pertama
+                    text: '{{ $errors->first() }}',
+                    confirmButtonColor: '#8B4513'
+                });
+            @endif
+
+            // Menangkap pesan sukses (Jika berhasil ganti password, Laravel mengirimkan session 'status')
+            @if (session('status'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('status') }}',
+                    confirmButtonColor: '#8B4513'
+                }).then((result) => {
+                    // Otomatis arahkan ke halaman login setelah di-klik OK
+                    if (result.isConfirmed) {
+                        window.location.href = "{{ route('login') }}";
+                    }
+                });
+            @endif
+        });
     </script>
 </body>
 

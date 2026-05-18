@@ -25,6 +25,7 @@
                         <th class="border px-4 py-3 text-sm font-bold text-gray-700 text-center">Status</th>
                         <th class="border px-4 py-3 text-sm font-bold text-gray-700 text-center">Peran (Role)</th>
                         <th class="border px-4 py-3 text-sm font-bold text-gray-700">Penempatan Proyek</th>
+                        <th class="border px-4 py-3 text-sm font-bold text-gray-700 text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="text-sm text-gray-600">
@@ -36,7 +37,7 @@
                                 <span class="block text-gray-800">{{ $user->username }}</span>
                                 <span class="block text-xs text-gray-500">{{ $user->email }}</span>
                             </td>
-                            <td class="border px-4 py-4">{{ $user->phone_number ?? '-' }}</td>
+                            <td class="border px-4 py-4">{{ $user->phone ?? '-' }}</td>
                             <td class="border px-4 py-4 text-center">
                                 {{-- Tombol klik untuk memicu modal status --}}
                                 <button type="button"
@@ -76,6 +77,22 @@
                             </td>
                             <td class="border px-4 py-4">
                                 {{ $user->project ? $user->project->name : 'Semua Proyek (Pusat)' }}
+                            </td>
+                            <td class="border px-4 py-4 text-center">
+                                <div class="flex justify-center gap-2">
+                                    {{-- Tombol Edit --}}
+                                    <button
+                                        onclick="openEditModal({{ $user->id }}, '{{ $user->name }}', '{{ $user->email }}', '{{ $user->username }}', '{{ $user->phone }}', '{{ $user->roles->first()->name ?? '' }}')"
+                                        class="text-orange-400 border border-orange-400 hover:bg-orange-50 rounded p-1 w-8 h-8 flex items-center justify-center transition">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+
+                                    {{-- Tombol Delete --}}
+                                    <button onclick="openDeleteModal({{ $user->id }}, '{{ $user->name }}')"
+                                        class="text-red-500 border border-red-500 hover:bg-red-50 rounded p-1 w-8 h-8 flex items-center justify-center transition">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     @endforeach
@@ -127,38 +144,57 @@
 
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Password Sementara</label>
-                            <input type="password" name="password" required placeholder="Minimal 8 Karakter"
-                                class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:ring-orange-400">
+                            <div class="relative">
+                                <input type="password" name="password" id="passwordSementara" required
+                                    placeholder="Minimal 8 Karakter"
+                                    class="shadow border rounded w-full py-2 px-3 pr-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent">
 
+                                {{-- Tombol Mata --}}
+                                <button type="button" onclick="togglePasswordSementara()"
+                                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none">
+                                    <svg id="eyeIconSementara" class="h-5 w-5" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Berikan password ini ke staf, mereka bisa meresetnya
+                                nanti.</p>
                         </div>
+
                         <div class="flex gap-4 mb-6">
                             <div class="w-1/2">
                                 <label class="block text-gray-700 text-sm font-bold mb-2">Pilih Role</label>
-                                {{-- Tambahkan id="roleSelect" --}}
                                 <select name="role" id="roleSelect" required
                                     class="shadow border rounded w-full py-2 px-3 text-gray-700 bg-white">
                                     <option value="" disabled selected>Pilih Peran...</option>
                                     @foreach ($roles as $role)
-                                        <option value="{{ $role->name }}"
-                                            {{ old('role') == $role->name ? 'selected' : '' }}>
-                                            {{ ucwords(str_replace('_', ' ', $role->name)) }}
-                                        </option>
+                                        {{-- MODIFIKASI: Sembunyikan role admin --}}
+                                        @if ($role->name !== 'admin')
+                                            <option value="{{ $role->name }}"
+                                                {{ old('role') == $role->name ? 'selected' : '' }}>
+                                                {{ ucwords(str_replace('_', ' ', $role->name)) }}
+                                            </option>
+                                        @endif
                                     @endforeach
                                 </select>
                             </div>
                             <div class="w-1/2">
                                 <label class="block text-gray-700 text-sm font-bold mb-2">Penempatan Proyek</label>
-                                {{-- Tambahkan id="projectSelect" --}}
-                                <select name="project_id" id="projectSelect"
+                                {{-- MODIFIKASI: Tambah required karena user non-admin wajib punya proyek --}}
+                                <select name="project_id" id="projectSelect" required
                                     class="shadow border rounded w-full py-2 px-3 text-gray-700 bg-white">
-                                    <option value="">-- Pusat (Semua Proyek) --</option>
+                                    {{-- MODIFIKASI: Ubah opsi default dan hilangkan pilihan Pusat --}}
+                                    <option value="" disabled selected>-- Pilih Proyek --</option>
                                     @foreach ($projects as $proj)
                                         @php
                                             $infoStaff = $proj->has_staff ? 'Terisi' : 'Kosong';
                                             $infoLog = $proj->has_logistik ? 'Terisi' : 'Kosong';
                                         @endphp
 
-                                        {{-- Tambahkan atribut data-has-staff dan data-has-logistik --}}
                                         <option value="{{ $proj->id }}"
                                             data-has-staff="{{ $proj->has_staff ? 1 : 0 }}"
                                             data-has-logistik="{{ $proj->has_logistik ? 1 : 0 }}"
@@ -167,10 +203,10 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <p id="projectHelpText" class="text-xs text-gray-500 mt-1">Pilih peran terlebih dahulu.</p>
+                                <p id="projectHelpText" class="text-xs text-gray-500 mt-1">Pilih peran terlebih dahulu.
+                                </p>
                             </div>
                         </div>
-
 
                         <div class="flex gap-4 mb-4">
                             <div class="w-1/2">
@@ -283,6 +319,116 @@
                                 class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                                 Batal
                             </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- MODAL EDIT USER --}}
+    <div id="modalEditUser" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title"
+        role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div onclick="toggleModal('modalEditUser')"
+                class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            <div
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 border-b border-gray-100">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-gray-900">Edit Data Pengguna</h3>
+                        <button type="button" onclick="toggleModal('modalEditUser')"
+                            class="text-gray-400 hover:text-gray-500"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+                    <form id="editUserForm" method="POST">
+                        @csrf
+                        @method('PUT')
+
+                        {{-- Nama & Email (READONLY) --}}
+                        <div class="flex gap-4 mb-4">
+                            <div class="w-1/2">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Nama Lengkap</label>
+                                <input type="text" id="edit_name" readonly
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-500 bg-gray-100 cursor-not-allowed">
+                            </div>
+                            <div class="w-1/2">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                                <input type="email" id="edit_email" readonly
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-500 bg-gray-100 cursor-not-allowed">
+                            </div>
+                        </div>
+
+                        {{-- Username & No HP (EDITABLE) --}}
+                        <div class="flex gap-4 mb-4">
+                            <div class="w-1/2">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Username Baru</label>
+                                <input type="text" name="username" id="edit_username" required
+                                    class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:ring-orange-400 focus:border-transparent">
+                            </div>
+                            <div class="w-1/2">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">No. HP / WhatsApp</label>
+                                <input type="text" name="phone" id="edit_phone"
+                                    class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:ring-orange-400 focus:border-transparent">
+                            </div>
+                        </div>
+
+                        {{-- Role (EDITABLE) --}}
+                        <div class="mb-6">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Peran (Role)</label>
+                            <select name="role" id="edit_role" required
+                                class="shadow border rounded w-full py-2 px-3 text-gray-700 bg-white">
+                                @foreach ($roles as $role)
+                                    <option value="{{ $role->name }}">{{ ucwords(str_replace('_', ' ', $role->name)) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="flex flex-row-reverse">
+                            <button type="submit"
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#FFB22C] text-base font-medium text-white hover:bg-orange-500 sm:ml-3 sm:w-auto sm:text-sm">
+                                Update Data
+                            </button>
+                            <button type="button" onclick="toggleModal('modalEditUser')"
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                Batal
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- MODAL DELETE USER --}}
+    <div id="modalDeleteUser" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title"
+        role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div onclick="toggleModal('modalDeleteUser')"
+                class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            <div
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-100">
+                    <h3 class="text-lg leading-6 font-bold text-gray-900">Hapus Pengguna</h3>
+                </div>
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+                    <p class="text-sm text-gray-500 mb-4">Apakah Anda yakin ingin menghapus akun <b id="delete_name"></b>?
+                        Data yang dihapus tidak dapat dikembalikan.</p>
+                    <form id="deleteUserForm" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <div class="flex flex-row-reverse">
+                            <button type="submit"
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 sm:ml-3 sm:w-auto sm:text-sm">Hapus
+                                Akun</button>
+                            <button type="button" onclick="toggleModal('modalDeleteUser')"
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
                         </div>
                     </form>
                 </div>
@@ -433,6 +579,46 @@
         // Fungsi untuk Tutup Modal Status
         function closeStatusModal() {
             document.getElementById('modalKonfirmasiStatus').classList.add('hidden');
+        }
+
+        function togglePasswordSementara() {
+            const passwordInput = document.getElementById('passwordSementara');
+            const eyeIcon = document.getElementById('eyeIconSementara');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                // Ubah SVG menjadi ikon mata dicoret
+                eyeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                `;
+            } else {
+                passwordInput.type = 'password';
+                // Ubah SVG kembali ke ikon mata normal
+                eyeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                `;
+            }
+        }
+
+        // Fungsi untuk Buka Modal Edit
+        function openEditModal(id, name, email, username, phone, role) {
+            document.getElementById('editUserForm').action = `/users/${id}`;
+            document.getElementById('edit_name').value = name;
+            document.getElementById('edit_email').value = email;
+            document.getElementById('edit_username').value = username;
+            document.getElementById('edit_phone').value = (phone !== '-') ? phone : '';
+            document.getElementById('edit_role').value = role;
+
+            toggleModal('modalEditUser');
+        }
+
+        // Fungsi untuk Buka Modal Hapus
+        function openDeleteModal(id, name) {
+            document.getElementById('deleteUserForm').action = `/users/${id}`;
+            document.getElementById('delete_name').innerText = name;
+
+            toggleModal('modalDeleteUser');
         }
     </script>
 

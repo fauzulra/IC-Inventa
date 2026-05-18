@@ -43,9 +43,12 @@ Route::middleware(['auth'])->group(function () {
     // Fitur Logout hanya bisa dilakukan kalau sudah login
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+   // Kelola Pengguna
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
     Route::put('/users/{user}/status', [UserController::class, 'updateStatus'])->name('users.updateStatus');
+    Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 
     // Dashboard
     Route::get('/',[DashboardController::class,'index'])->name('dashboard');

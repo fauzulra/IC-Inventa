@@ -102,5 +102,50 @@ class UserController extends Controller
         return redirect()->back()->with('success', 'Status akun ' . $user->name . ' berhasil diperbarui!');
     }
 
-   
+    // =========================================================================
+    // FUNGSI UNTUK UPDATE DATA PENGGUNA
+    // =========================================================================
+    public function update(Request $request, $id)
+    {
+        if (!auth()->user()->hasRole('admin')) {
+            return redirect()->back()->with('error', 'Akses Ditolak!');
+        }
+
+        $user = User::findOrFail($id);
+
+        $request->validate([
+            // Username harus unik, kecuali milik user ini sendiri
+            'username' => 'required|string|max:255|unique:users,username,' . $id,
+            'phone'    => 'nullable|string|max:20',
+            'role'     => 'required|exists:roles,name',
+        ]);
+
+        // Update Data User (Hanya Username dan No HP)
+        $user->update([
+            'username' => $request->username,
+            'phone'    => $request->phone,
+        ]);
+
+        // Sync (Ganti) Role menggunakan fungsi bawaan Spatie
+        $user->syncRoles([$request->role]);
+
+        return redirect()->back()->with('success', 'Data pengguna berhasil diperbarui!');
+    }
+
+    // =========================================================================
+    // FUNGSI UNTUK MENGHAPUS PENGGUNA
+    // =========================================================================
+    public function destroy($id)
+    {
+        if (!auth()->user()->hasRole('admin')) {
+            return redirect()->back()->with('error', 'Akses Ditolak!');
+        }
+
+        $user = User::findOrFail($id);
+        
+        // Hapus data pengguna
+        $user->delete();
+
+        return redirect()->back()->with('success', 'Pengguna berhasil dihapus dari sistem!');
+    }
 }

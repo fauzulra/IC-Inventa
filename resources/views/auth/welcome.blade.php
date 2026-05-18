@@ -38,6 +38,7 @@
                 <form class="mt-4 space-y-4" action="{{ route('login') }}" method="POST">
                     @csrf
 
+                    {{-- Username Field --}}
                     <div class="">
                         <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
                         <div class="mt-1 relative rounded-md shadow-sm">
@@ -53,6 +54,7 @@
                         </div>
                     </div>
 
+                    {{-- Password Field with Toggle Eye --}}
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
                         <div class="mt-1 relative rounded-md shadow-sm">
@@ -63,8 +65,23 @@
                                         d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
                             </div>
+
+                            {{-- Input Password --}}
                             <input type="password" name="password" id="password" required
-                                class="focus:ring-yellow-500 focus:border-yellow-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3 border">
+                                class="focus:ring-yellow-500 focus:border-yellow-500 block w-full pl-10 pr-10 sm:text-sm border-gray-300 rounded-md py-3 border">
+
+                            {{-- Toggle Button (Eye Icon) --}}
+                            <button type="button" onclick="togglePassword()"
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-[#747474] hover:text-gray-900 focus:outline-none">
+                                {{-- Ikon Mata Terbuka (Default tersembunyi jika password tersembunyi, tapi karena ini awal, kita pakai icon mata normal) --}}
+                                <svg id="eyeIcon" class="h-5 w-5" fill="none" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
 
@@ -82,15 +99,6 @@
                             Log In
                         </button>
                     </div>
-                    {{-- <div class="flex items-center justify-center">
-                        <div class="text-sm">
-                            <span class="font-medium text-gray-600">Belum punya akun?</span>
-                            <a href="{{ route('register') }}"
-                                class="font-medium text-[#0065F8] hover:text-blue-800 underline ">
-                                Daftar disini
-                            </a>
-                        </div>
-                    </div> --}}
                 </form>
             </div>
         </div>
@@ -99,8 +107,30 @@
     {{-- 1. Import Library SweetAlert2 via CDN --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    {{-- 2. Logika Pemanggilan SweetAlert --}}
+    {{-- 2. Logika Pemanggilan SweetAlert & Toggle Password --}}
     <script>
+        // FUNGSI TOGGLE PASSWORD VISIBILITY
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('eyeIcon');
+
+            // Cek tipe saat ini, ubah ke kebalikannya
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                // Ubah SVG menjadi ikon mata dicoret (Tutup Mata)
+                eyeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                `;
+            } else {
+                passwordInput.type = 'password';
+                // Ubah SVG kembali ke ikon mata normal (Buka Mata)
+                eyeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                `;
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
 
             // SKENARIO 1: Menangkap error validasi bawaan Laravel
@@ -114,7 +144,7 @@
                 });
             @endif
 
-            // SKENARIO 2: Menangkap error kustom dari Controller (jika Anda pakai with('error', '...'))
+            // SKENARIO 2: Menangkap error kustom dari Controller
             @if (session('error'))
                 Swal.fire({
                     icon: 'error',
@@ -125,7 +155,7 @@
                 });
             @endif
 
-            // SKENARIO 3: Menangkap pesan sukses (misal setelah reset password / logout)
+            // SKENARIO 3: Menangkap pesan sukses
             @if (session('status'))
                 Swal.fire({
                     icon: 'success',
