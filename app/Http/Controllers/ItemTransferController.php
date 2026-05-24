@@ -78,27 +78,91 @@ class ItemTransferController extends Controller
     }
 
     public function orderStore(Request $request)
+{
+    $request->validate([
+        'from_project_id' => 'required|integer|exists:projects,id',
+        'to_project_id'   => 'required|integer|exists:projects,id',
+        'material_id'     => 'required|integer|exists:materials,id',
+        'quantity'        => 'required|integer|min:1',
+        'transfer_date'   => 'required|date',
+    ], [
+        // Pesan error kustom (opsional)
+        'from_project_id.required' => 'Proyek asal wajib dipilih.',
+        'quantity.min'             => 'Kuantitas minimal adalah 1.',
+    ]);
+
+    if ($request->from_project_id == $request->to_project_id) {
+        return redirect()->back()->with('error', 'Gagal! Proyek tujuan tidak boleh sama dengan proyek asal.');
+    }
+
+    // =========================================================
+    // LOGIKA VALIDASI STOK (Baru)
+    // =========================================================
+    $projectAsal = Project::findOrFail($request->from_project_id);
+    
+    // Mengambil data material spesifik dari pivot table proyek asal
+    $materialInProject = $projectAsal->materials()->where('material_id', $request->material_id)->first();
+
+    // Jika material tidak ditemukan di proyek asal ATAU stok kurang
+    if (!$materialInProject || $materialInProject->pivot->stock < $request->quantity) {
+        $stokTersedia = $materialInProject ? $materialInProject->pivot->stock : 0;
+        $unit = $materialInProject ? $materialInProject->unit : '';
+
+        return redirect()->back()
+            ->with('error', "Stok tidak mencukupi! Tersedia hanya: {$stokTersedia} {$unit}.")
+            ->withInput(); 
+    }
+    // =========================================================
+
+    ItemTransfer::create(array_merge($request->all(), [
+        'status' => 'pending'
+    ]));
+
+    return redirect()->back()->with('success', 'Pengajuan transfer barang berhasil dibuat!');
+}
+
+    public function orderUpdate(Request $request, $id)
     {
         $request->validate([
             'from_project_id' => 'required|integer|exists:projects,id',
-            'to_project_id'   => 'required|integer|exists:projects,id',
             'material_id'     => 'required|integer|exists:materials,id',
             'quantity'        => 'required|integer|min:1',
             'transfer_date'   => 'required|date',
         ]);
 
-        if ($request->from_project_id == $request->to_project_id) {
+        $transfer = ItemTransfer::findOrFail($id);
+
+        // Keamanan: Hanya bisa edit jika status masih pending
+        if (strtolower($transfer->status) !== 'pending') {
+            return redirect()->back()->with('error', 'Hanya pengajuan berstatus pending yang dapat diedit!');
+        }
+
+        if ($request->from_project_id == $transfer->to_project_id) {
             return redirect()->back()->with('error', 'Gagal! Proyek tujuan tidak boleh sama dengan proyek asal.');
         }
 
-        // Opsi Keamanan Ekstra: Bisa dicek dulu apakah quantity yang diminta melebihi sisa stok di Pivot Table Proyek Asal
-        // ...
+        $transfer->update([
+            'from_project_id' => $request->from_project_id,
+            'material_id'     => $request->material_id,
+            'quantity'        => $request->quantity,
+            'transfer_date'   => $request->transfer_date,
+        ]);
 
-        ItemTransfer::create(array_merge($request->all(), [
-            'status' => 'pending'
-        ]));
+        return redirect()->back()->with('success', 'Pengajuan transfer barang berhasil diperbarui!');
+    }
 
-        return redirect()->back()->with('success', 'Pengajuan transfer barang berhasil dibuat!');
+    public function orderDestroy($id)
+    {
+        $transfer = ItemTransfer::findOrFail($id);
+
+        // Keamanan: Hanya bisa dibatalkan jika status masih pending
+        if (strtolower($transfer->status) !== 'pending') {
+            return redirect()->back()->with('error', 'Hanya pengajuan berstatus pending yang dapat dibatalkan!');
+        }
+
+        $transfer->delete();
+
+        return redirect()->back()->with('success', 'Pengajuan transfer barang berhasil dibatalkan/dihapus!');
     }
 
 

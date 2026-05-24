@@ -62,36 +62,71 @@ class IncomingGoodController extends Controller
 
     public function store(Request $request)
     {
+        // Validasi input
         $request->validate([
             'project_id'    => 'required|integer|exists:projects,id',
-            'order_id'      => 'nullable|integer|exists:orders,id', // Tambahan: ID pesanan
-            'material_id'   => 'required|integer|exists:materials,id',
-            'supplier_id'   => 'nullable|integer|exists:suppliers,id',
+            'order_id'      => 'required|integer|exists:orders,id', // Diubah menjadi required karena ini wajib dari pesanan
             'quantity'      => 'required|integer|min:1',
             'date_received' => 'required|date',
+            'supplier_id'   => 'nullable|integer|exists:suppliers,id',
         ]);
 
-        // 1. Catat ke tabel incoming_goods
+        $project = Project::find($request->project_id);
+        $order = Order::find($request->order_id);
+
+        if (!$order) {
+            return redirect()->back()->with('error', 'Pesanan tidak ditemukan!');
+        }
+
+        // =========================================================================
+        // LOGIKA AUTO-CREATE MATERIAL
+        // =========================================================================
+        
+        // 1. Cek apakah di tabel 'materials' (Global) sudah ada material dengan NAMA dan SATUAN yang persis sama
+        // Menggunakan huruf kecil (strtolower) agar pencariannya tidak sensitif huruf besar/kecil
+        $material = Material::whereRaw('LOWER(name) = ?', [strtolower($order->name)])
+                            ->whereRaw('LOWER(unit) = ?', [strtolower($order->unit)])
+                            ->first();
+
+        // 2. Jika material BELUM ADA di database global, sistem buatkan yang baru
+        if (!$material) {
+            $material = Material::create([
+                'name'        => ucwords(strtolower($order->name)),
+                'unit'        => ucwords(strtolower($order->unit)),
+                'supplier_id' => $request->supplier_id, // Bisa null
+            ]);
+        }
+
+        // =========================================================================
+        // LOGIKA PENAMBAHAN STOK DI PIVOT TABLE PROYEK
+        // =========================================================================
+        
+        // Cek apakah proyek ini sudah "memiliki" material tersebut di Pivot Table
+        $materialInProject = $project->materials()->where('material_id', $material->id)->first();
+
+        if ($materialInProject) {
+            // Jika sudah ada di proyek, tambahkan stoknya
+            $newStock = $materialInProject->pivot->stock + $request->quantity;
+            $project->materials()->updateExistingPivot($material->id, ['stock' => $newStock]);
+        } else {
+            // Jika belum ada di proyek, pasangkan (attach) dengan stok awal dari penerimaan ini
+            $project->materials()->attach($material->id, ['stock' => $request->quantity]);
+        }
+
+        // =========================================================================
+        // PENCATATAN HISTORI BARANG MASUK & UPDATE STATUS PESANAN
+        // =========================================================================
+        
+        // Catat ke tabel riwayat barang masuk (incoming_goods)
         IncomingGood::create([
             'project_id'    => $request->project_id,
-            'material_id'   => $request->material_id,
+            'material_id'   => $material->id, // Menggunakan ID dari material yang ditemukan/baru dibuat
             'supplier_id'   => $request->supplier_id,
             'quantity'      => $request->quantity,
             'date_received' => $request->date_received,
         ]);
 
-        // 2. Tambah stok di Pivot Table Proyek tersebut
-        $project = Project::find($request->project_id);
-        $materialInProject = $project->materials()->where('material_id', $request->material_id)->first();
-
-        if ($materialInProject) {
-            $newStock = $materialInProject->pivot->stock + $request->quantity;
-            $project->materials()->updateExistingPivot($request->material_id, ['stock' => $newStock]);
-        } else {
-            $project->materials()->attach($request->material_id, ['stock' => $request->quantity]);
-        }
-
-        // 3. LOGIKA BARU: Jika ini berasal dari pesanan (Order), ubah statusnya agar selesai!
+        // Ubah status pesanan agar ditutup
         if ($request->order_id) {
             $order = Order::find($request->order_id);
             if ($order) {
@@ -99,7 +134,10 @@ class IncomingGoodController extends Controller
             }
         }
 
-        return redirect()->back()->with('success', 'Barang diterima! Stok proyek bertambah dan Pesanan telah ditutup.');
+        // Redirect kembali dengan menambahkan 'reopen_modal' agar View tahu modal harus dibuka lagi
+        return redirect()->back()
+            ->with('success', 'Barang berhasil diterima!.')
+            ->with('reopen_modal', true);
     }
 
     public function printReport(Request $request)

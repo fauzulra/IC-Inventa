@@ -173,21 +173,6 @@
                             </div>
                             <div class="w-1/2">
                                 <label class="block text-gray-700 text-sm font-bold mb-2">Satuan</label>
-                                <input type="text" name="unit" id="input_material_unit"
-                                    placeholder="Pcs / Kg / Lbr" required value="{{ old('unit') }}"
-                                    class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
-                            </div>
-                        </div>
-
-                        <div class="flex gap-4 mb-4">
-                            <div class="w-1/2">
-                                <label class="block text-gray-700 text-sm font-bold mb-2">Kuantitas</label>
-                                <input type="number" name="quantity" placeholder="0" required min="1"
-                                    value="{{ old('quantity') }}"
-                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
-                            </div>
-                            <div class="w-1/2">
-                                <label class="block text-gray-700 text-sm font-bold mb-2">Satuan</label>
                                 <input type="text" name="unit" placeholder="Pcs / Kg / Lbr" required
                                     value="{{ old('unit') }}"
                                     class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">

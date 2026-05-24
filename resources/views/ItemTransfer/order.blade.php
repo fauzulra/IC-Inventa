@@ -80,7 +80,7 @@
                             <td class="border border-gray-200 px-4 py-3 text-center">{{ $loop->iteration }}</td>
 
                             <td class="border border-gray-200 px-4 py-3 font-medium text-gray-900">
-                                {{ $transfer->material ? $transfer->material->name : 'Material Dihapus' }}
+                                {{ ucwords($transfer->material ? $transfer->material->name : 'Material Dihapus') }}
                             </td>
 
                             <td class="border border-gray-200 px-4 py-3 font-bold text-orange-600">
@@ -92,7 +92,7 @@
                             </td>
 
                             <td class="border border-gray-200 px-4 py-3">
-                                {{ $transfer->toProject ? $transfer->toProject->name : '-' }}
+                                {{ $transfer->fromProject ? $transfer->fromProject->name : '-' }}
                             </td>
 
                             <td class="border border-gray-200 px-4 py-3 text-center">
@@ -119,10 +119,17 @@
 
                             <td class="border border-gray-200 px-4 py-3 text-center">
                                 @if ($statusLow == 'pending')
-                                    <button class="text-blue-500 hover:text-blue-700 mx-1" title="Edit"><i
-                                            class="fas fa-edit"></i></button>
-                                    <button class="text-red-500 hover:text-red-700 mx-1" title="Batalkan"><i
-                                            class="fas fa-trash"></i></button>
+                                    <button
+                                        onclick="openEditModal({{ $transfer->id }}, {{ $transfer->from_project_id }}, {{ $transfer->material_id }}, {{ $transfer->quantity }}, '{{ \Carbon\Carbon::parse($transfer->transfer_date)->format('Y-m-d') }}')"
+                                        class="text-blue-500 hover:text-blue-700 mx-1 transition transform hover:scale-110"
+                                        title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="openDeleteModal({{ $transfer->id }})"
+                                        class="text-red-500 hover:text-red-700 mx-1 transition transform hover:scale-110"
+                                        title="Batalkan">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 @else
                                     <span class="text-gray-400 text-xs italic">Dikunci</span>
                                 @endif
@@ -239,6 +246,109 @@
             </div>
         </div>
     </div>
+
+    {{-- MODAL EDIT PENGAJUAN TRANSFER --}}
+    <div id="modalEditPesanan" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title"
+        role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div onclick="toggleModal('modalEditPesanan')"
+                class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            <div
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-100">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-gray-900">Edit Permintaan Transfer</h3>
+                        <button onclick="toggleModal('modalEditPesanan')" class="text-gray-400 hover:text-gray-500"><i
+                                class="fas fa-times"></i></button>
+                    </div>
+                </div>
+
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+                    <form id="formEditPesanan" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Minta Dari Proyek:</label>
+                            <select name="from_project_id" id="edit_from_project_id" required
+                                onchange="fetchMaterialsForEdit(this.value)"
+                                class="shadow border rounded w-full py-2 px-3 text-gray-700 bg-white">
+                                <option value="" disabled>Pilih Proyek Asal...</option>
+                                @if (isset($allProjects))
+                                    @foreach ($allProjects as $proj)
+                                        @if ($proj->id != $project->id)
+                                            <option value="{{ $proj->id }}">{{ $proj->code }} -
+                                                {{ $proj->name }}</option>
+                                        @endif
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Pilih Material</label>
+                            <select name="material_id" id="edit_material_id" required
+                                class="shadow border rounded w-full py-2 px-3 text-gray-700 bg-white">
+                                <option value="" disabled selected>Memuat material...</option>
+                            </select>
+                        </div>
+
+                        <div class="flex gap-4 mb-6">
+                            <div class="w-1/2">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Kuantitas</label>
+                                <input type="number" name="quantity" id="edit_quantity" required min="1"
+                                    class="shadow border rounded w-full py-2 px-3 text-gray-700">
+                            </div>
+                            <div class="w-1/2">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Target Tanggal</label>
+                                <input type="date" name="transfer_date" id="edit_transfer_date" required
+                                    class="shadow border rounded w-full py-2 px-3 text-gray-700">
+                            </div>
+                        </div>
+
+                        <div class="flex flex-row-reverse">
+                            <button type="submit"
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 sm:ml-3 sm:w-auto sm:text-sm">Update
+                                Permintaan</button>
+                            <button type="button" onclick="toggleModal('modalEditPesanan')"
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- MODAL HAPUS/BATAL TRANSFER --}}
+    <div id="modalDeletePesanan" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title"
+        role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div onclick="toggleModal('modalDeletePesanan')"
+                class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            <div
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 border-b border-gray-100">
+                    <h3 class="text-lg font-bold text-gray-900">Batalkan Pengajuan Transfer</h3>
+                </div>
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+                    <p class="text-sm text-gray-500 mb-4">Apakah Anda yakin ingin membatalkan pengajuan transfer barang
+                        ini?</p>
+                    <form id="formDeletePesanan" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <div class="flex flex-row-reverse">
+                            <button type="submit"
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-white hover:bg-red-700 sm:ml-3 sm:w-auto sm:text-sm">Ya,
+                                Batalkan</button>
+                            <button type="button" onclick="toggleModal('modalDeletePesanan')"
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Tutup</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('script')
@@ -285,6 +395,88 @@
                     console.error('Error fetching materials:', error);
                     materialSelect.innerHTML = '<option value="" disabled selected>Gagal memuat data.</option>';
                 });
+        });
+
+        function openEditModal(id, fromProjectId, materialId, quantity, transferDate) {
+            // Set action URL form
+            document.getElementById('formEditPesanan').action = `/itemtransfer/order/${id}`;
+
+            // Set value input biasa
+            document.getElementById('edit_from_project_id').value = fromProjectId;
+            document.getElementById('edit_quantity').value = quantity;
+            document.getElementById('edit_transfer_date').value = transferDate;
+
+            // Karena material_id adalah dropdown yang di-fetch secara AJAX, kita panggil fungsinya khusus
+            fetchMaterialsForEdit(fromProjectId, materialId);
+
+            toggleModal('modalEditPesanan');
+        }
+
+        function openDeleteModal(id) {
+            document.getElementById('formDeletePesanan').action = `/itemtransfer/order/${id}`;
+            toggleModal('modalDeletePesanan');
+        }
+
+        // Fungsi fetch material khusus untuk modal EDIT (Mirip dengan AJAX Tambah Data)
+        function fetchMaterialsForEdit(projectId, selectedMaterialId = null) {
+            let materialSelect = document.getElementById('edit_material_id');
+            materialSelect.innerHTML = '<option value="" disabled selected>Memuat data material...</option>';
+
+            fetch(`/itemtransfer/project/${projectId}/materials`)
+                .then(response => response.json())
+                .then(data => {
+                    materialSelect.innerHTML = '<option value="" disabled>Pilih Material...</option>';
+                    if (data.length === 0) {
+                        materialSelect.innerHTML +=
+                            '<option value="" disabled>Proyek ini tidak memiliki stok material.</option>';
+                        return;
+                    }
+                    data.forEach(material => {
+                        // Cek apakah material ini yang sedang tersimpan sebelumnya
+                        let isSelected = (selectedMaterialId && material.id == selectedMaterialId) ?
+                            'selected' : '';
+                        materialSelect.innerHTML += `
+                            <option value="${material.id}" ${isSelected}>
+                                ${material.name} (Sisa Stok: ${material.pivot.stock} ${material.unit})
+                            </option>
+                        `;
+                    });
+                })
+                .catch(error => {
+                    materialSelect.innerHTML = '<option value="" disabled selected>Gagal memuat data.</option>';
+                });
+        }
+        document.addEventListener("DOMContentLoaded", function() {
+            // ... (kode sukses lainnya) ...
+
+            // Jika ada pesan error dari controller (termasuk validasi stok)
+            @if (session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Stok Tidak Cukup!',
+                    text: "{{ session('error') }}",
+                    confirmButtonColor: '#d33'
+                });
+            @endif
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // MENANGKAP SEMUA ERROR VALIDASI
+            @if ($errors->any())
+                // Jika validasi gagal, buka kembali modal yang bersangkutan
+                // Ganti 'modalTambahPesanan' sesuai ID modal di halaman tersebut
+                if (typeof toggleModal !== 'undefined') {
+                    toggleModal('modalTambahPesanan');
+                }
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Data Tidak Valid!',
+                    // Menampilkan pesan error pertama dari daftar error
+                    text: '{{ $errors->first() }}',
+                    confirmButtonColor: '#d33'
+                });
+            @endif
         });
     </script>
     @include('layout.script')

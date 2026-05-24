@@ -53,7 +53,6 @@
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Material</th>
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Kuantitas</th>
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Tgl Transfer</th>
-                        <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Proyek Asal</th>
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Proyek Tujuan</th>
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700 text-center">Status</th>
                     </tr>
@@ -63,14 +62,12 @@
                         <tr class="hover:bg-gray-50 transition">
                             <td class="border border-gray-200 px-4 py-3 text-center">{{ $loop->iteration }}</td>
                             <td class="border border-gray-200 px-4 py-3 font-medium text-gray-900">
-                                {{ $transfer->material ? $transfer->material->name : 'Material Dihapus' }}
+                                {{ ucwords($transfer->material ? $transfer->material->name : 'Material Dihapus') }}
                             </td>
                             <td class="border border-gray-200 px-4 py-3">{{ $transfer->quantity }}
                                 {{ $transfer->material ? $transfer->material->unit : '' }}</td>
                             <td class="border border-gray-200 px-4 py-3">
                                 {{ \Carbon\Carbon::parse($transfer->transfer_date)->format('d/m/Y') }}</td>
-                            <td class="border border-gray-200 px-4 py-3">
-                                {{ $transfer->fromProject ? $transfer->fromProject->name : '-' }}</td>
                             <td class="border border-gray-200 px-4 py-3">
                                 {{ $transfer->toProject ? $transfer->toProject->name : '-' }}</td>
 

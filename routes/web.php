@@ -105,6 +105,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/itemtransfer/order/project/{id}', [ItemTransferController::class, 'showProjectOrders'])->name('itemtransfer.order.show');
     Route::get('/itemtransfer/project/{id}/materials', [ItemTransferController::class, 'getProjectMaterials']);
     Route::post('/itemtransfer/order', [ItemTransferController::class, 'orderStore'])->name('itemtransfer.order.store');
+    Route::put('/itemtransfer/order/{id}', [ItemTransferController::class, 'orderUpdate'])->name('itemtransfer.order.update');
+    Route::delete('/itemtransfer/order/{id}', [ItemTransferController::class, 'orderDestroy'])->name('itemtransfer.order.destroy');
     // 2. KONFIRMASI TRANSFER BARANG
     Route::get('/itemtransfer/confirmation', [ItemTransferController::class, 'confirmationIndex'])->name('itemtransfer.confirmation');
     Route::get('/itemtransfer/confirmation/project/{id}', [ItemTransferController::class, 'showProjectConfirmations'])->name('itemtransfer.confirmation.show');

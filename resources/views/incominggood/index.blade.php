@@ -96,7 +96,7 @@
                             <td class="border border-gray-200 px-4 py-4 text-center">{{ $loop->iteration }}</td>
 
                             <td class="border border-gray-200 px-4 py-4 font-medium text-gray-900">
-                                {{ $incoming->material ? $incoming->material->name : 'Item Dihapus' }}
+                                {{ ucwords($incoming->material ? $incoming->material->name : 'Item Dihapus') }}
                             </td>
 
                             <td class="border border-gray-200 px-4 py-4 font-bold text-green-600">
@@ -108,7 +108,7 @@
                             </td>
 
                             <td class="border border-gray-200 px-4 py-4">
-                                {{ $incoming->supplier ? $incoming->supplier->name : 'Dari Transfer Proyek / Lainnya' }}
+                                {{ $incoming->supplier ? $incoming->supplier->name : '-' }}
                             </td>
                         </tr>
                     @empty
@@ -148,22 +148,21 @@
                     <form action="{{ route('incominggood.store') }}" method="POST">
                         @csrf
 
-                        <!-- HIDDEN PROJECT ID -->
                         <input type="hidden" name="project_id" value="{{ $project->id }}">
 
-                        <!-- 1. PILIH PESANAN YANG DATANG -->
                         <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                             <label class="block text-blue-800 text-sm font-bold mb-2">Berdasarkan Surat Pesanan:</label>
                             <div class="relative">
-                                <select name="order_id" id="order_id"
+                                <select name="order_id" id="order_id" required
                                     class="shadow appearance-none border border-blue-300 rounded w-full py-2 pl-3 pr-10 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-                                    <option value="" selected>-- Pilih Pesanan yang Telah Dikonfirmasi --</option>
+                                    <option value="" selected disabled>-- Pilih Pesanan yang Telah Dikonfirmasi --
+                                    </option>
                                     @if (isset($approvedOrders))
                                         @foreach ($approvedOrders as $order)
-                                            <!-- Kita simpan data kuantitas di atribut 'data-qty' agar bisa dibaca JS -->
                                             <option value="{{ $order->id }}" data-qty="{{ $order->quantity }}">
-                                                {{ $order->name }} (Pesan: {{ $order->quantity }} {{ $order->unit }}) -
-                                                Tgl: {{ \Carbon\Carbon::parse($order->request_date)->format('d/m/Y') }}
+                                                {{ ucwords($order->name) }} (Pesanan: {{ $order->quantity }}
+                                                {{ $order->unit }}) - Tgl:
+                                                {{ \Carbon\Carbon::parse($order->request_date)->format('d/m/Y') }}
                                             </option>
                                         @endforeach
                                     @endif
@@ -173,34 +172,12 @@
                                     <i class="fas fa-chevron-down text-xs"></i>
                                 </div>
                             </div>
-                            <p class="text-xs text-blue-600 mt-1 italic">Hanya pesanan berstatus 'Selesai' yang muncul di
-                                sini.</p>
+                            <p class="text-xs text-blue-600 mt-2 italic">
+                                <i class="fas fa-info-circle"></i> Sistem akan otomatis mencocokkan atau membuat Master
+                                Material baru berdasarkan nama pesanan.
+                            </p>
                         </div>
 
-                        <!-- 2. HUBUNGKAN KE MASTER MATERIAL -->
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Simpan ke Master Material</label>
-                            <div class="relative">
-                                <select name="material_id" required
-                                    class="shadow appearance-none border rounded w-full py-2 pl-3 pr-10 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent bg-white">
-                                    <option value="" disabled selected>Cocokkan pesanan dengan data Master Material...
-                                    </option>
-                                    @foreach ($materials as $material)
-                                        {{-- LOGIKA BARU: Tampilkan stok saat ini dari tabel Pivot --}}
-                                        <option value="{{ $material->id }}">
-                                            {{ $material->name }} (Stok saat ini: {{ $material->pivot->stock }}
-                                            {{ $material->unit }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <div
-                                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
-                                    <i class="fas fa-chevron-down text-xs"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 3. DETAIL PENERIMAAN -->
                         <div class="flex gap-4 mb-4">
                             <div class="w-1/2">
                                 <label class="block text-gray-700 text-sm font-bold mb-2">Kuantitas Diterima</label>
@@ -215,13 +192,12 @@
                                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                             </div>
                         </div>
-
-                        <div class="mb-6">
+                        {{-- <div class="mb-6">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Sumber Barang (Pemasok)</label>
                             <div class="relative">
                                 <select name="supplier_id"
                                     class="shadow appearance-none border rounded w-full py-2 pl-3 pr-10 text-gray-700 leading-normal focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent bg-white">
-                                    <option value="" selected>-- Dari Transfer Proyek / Lainnya --</option>
+                                    <option value="" selected>-- Tidak Diketahui / Lainnya --</option>
                                     @foreach ($suppliers as $supplier)
                                         <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
                                     @endforeach
@@ -231,7 +207,7 @@
                                     <i class="fas fa-chevron-down text-xs"></i>
                                 </div>
                             </div>
-                        </div>
+                        </div> --}}
 
                         <div class="flex flex-row-reverse">
                             <button type="submit"
@@ -340,18 +316,60 @@
 
         // Script untuk mengisi kuantitas otomatis saat pesanan dipilih
         document.getElementById('order_id').addEventListener('change', function() {
-            // Ambil opsi yang sedang dipilih
             let selectedOption = this.options[this.selectedIndex];
-
-            // Ambil data-qty dari opsi tersebut
             let qty = selectedOption.getAttribute('data-qty');
 
-            // Jika ada isinya, masukkan ke input kuantitas
             if (qty) {
                 document.getElementById('quantity_input').value = qty;
             } else {
                 document.getElementById('quantity_input').value = '';
             }
+        });
+
+        // TANGKAP PESAN SUCCESS & ERROR DARI CONTROLLER
+        document.addEventListener("DOMContentLoaded", function() {
+
+            // JIKA MENERIMA SINYAL UNTUK MEMBUKA MODAL KEMBALI SETELAH SIMPAN
+            @if (session('reopen_modal'))
+                toggleModal('modalTambahBarangMasuk');
+            @endif
+
+            // Jika Berhasil Disimpan
+            @if (session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: "{{ session('success') }}",
+                    confirmButtonColor: '#28a745'
+                });
+            @endif
+
+            // Jika ada error dari validasi input
+            @if ($errors->any())
+                // Karena error, kita buka juga modalnya biar user bisa memperbaiki
+                // Pengecekan class list agar tidak terjadi toggle ganda jika reopen_modal juga aktif
+                if (document.getElementById('modalTambahBarangMasuk').classList.contains('hidden')) {
+                    toggleModal('modalTambahBarangMasuk');
+                }
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Menyimpan!',
+                    text: 'Silakan periksa kembali isian form Anda.',
+                    confirmButtonColor: '#d33'
+                });
+            @endif
+
+            // Jika ada pesan error kustom
+            @if (session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: "{{ session('error') }}",
+                    confirmButtonColor: '#d33'
+                });
+            @endif
+
         });
     </script>
     @include('layout.script')

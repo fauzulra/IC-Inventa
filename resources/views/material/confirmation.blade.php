@@ -146,15 +146,6 @@
                             <label class="block text-gray-700 text-sm font-bold mb-3">Pilih Status Baru:</label>
                             <div class="space-y-3">
                                 <label
-                                    class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-blue-50 transition group">
-                                    <input type="radio" name="status" value="Berjalan" required
-                                        class="h-4 w-4 text-blue-400 focus:ring-blue-400 border-gray-300">
-                                    <span
-                                        class="ml-3 flex-1 block font-medium text-gray-700 group-hover:text-blue-600">Menunggu</span>
-                                    <span
-                                        class="bg-blue-400 text-white px-3 py-1.5 rounded-md text-xs font-semibold">Pending</span>
-                                </label>
-                                <label
                                     class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-green-50 transition group">
                                     <input type="radio" name="status" value="Diterima" required
                                         class="h-4 w-4 text-green-500 focus:ring-green-500 border-gray-300">
