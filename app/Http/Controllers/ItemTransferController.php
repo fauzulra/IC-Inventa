@@ -6,6 +6,7 @@ use App\Models\ItemTransfer;
 use App\Models\Material;
 use App\Models\Order;
 use App\Models\Project;
+use App\Models\OutgoingGood;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -214,18 +215,49 @@ class ItemTransferController extends Controller
             return redirect()->back()->with('error', 'Status transfer yang sudah final tidak dapat diubah lagi!');
         }
 
-        $transfer->update([
-            'status' => $request->status
-        ]);
+        // Mulai transaksi database agar aman
+        DB::beginTransaction();
 
-        /* 
-         * Catatan Fitur Lanjutan:
-         * Jika Anda ingin otomatis memindahkan stok di database ketika status diubah menjadi "Diterima",
-         * Anda bisa menuliskan logika pengurangan stok di Pivot `from_project` 
-         * dan penambahan stok di Pivot `to_project` di bagian sini.
-         */
+        try {
+            // 1. Update status transfer
+            $transfer->update([
+                'status' => $request->status
+            ]);
 
-        return redirect()->back()->with('success', 'Status transfer barang berhasil diperbarui!');
+            // 2. Jika disetujui/diterima, proses pengurangan stok & catat barang keluar
+            if (strtolower($request->status) === 'diterima') {
+                
+                $projectAsal = Project::findOrFail($transfer->from_project_id);
+                $materialInProject = $projectAsal->materials()->where('material_id', $transfer->material_id)->first();
+
+                // Validasi ulang untuk jaga-jaga jika stok tiba-tiba habis sebelum dikonfirmasi
+                if (!$materialInProject || $materialInProject->pivot->stock < $transfer->quantity) {
+                    DB::rollBack(); // Batalkan semua proses
+                    return redirect()->back()->with('error', 'Gagal Konfirmasi! Sisa stok di proyek Anda saat ini tidak mencukupi untuk transfer ini.');
+                }
+
+                // A. Kurangi stok di Pivot Table (Gudang Asal)
+                $newStock = $materialInProject->pivot->stock - $transfer->quantity;
+                $projectAsal->materials()->updateExistingPivot($transfer->material_id, ['stock' => $newStock]);
+
+                // B. Buat Catatan Barang Keluar (Sesuaikan nama kolom dengan tabel OutgoingGood Anda)
+                OutgoingGood::create([
+                    'source_project_id'      => $transfer->from_project_id,
+                    'destination_project_id' => $transfer->to_project_id,
+                    'material_id'            => $transfer->material_id,
+                    'quantity'               => $transfer->quantity,
+                    'date_shipped'           => now(),
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Status transfer berhasil diperbarui');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+        }
     }
 
     

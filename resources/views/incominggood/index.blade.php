@@ -150,21 +150,43 @@
 
                         <input type="hidden" name="project_id" value="{{ $project->id }}">
 
+                        <input type="hidden" name="project_id" value="{{ $project->id }}">
+
                         <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                            <label class="block text-blue-800 text-sm font-bold mb-2">Berdasarkan Surat Pesanan:</label>
+                            <label class="block text-blue-800 text-sm font-bold mb-2">Berdasarkan Surat Pesanan /
+                                Transfer:</label>
                             <div class="relative">
-                                <select name="order_id" id="order_id" required
+                                {{-- NAMA & ID INPUT DIUBAH MENJADI reference_id --}}
+                                <select name="reference_id" id="reference_id" required
                                     class="shadow appearance-none border border-blue-300 rounded w-full py-2 pl-3 pr-10 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-                                    <option value="" selected disabled>-- Pilih Pesanan yang Telah Dikonfirmasi --
+                                    <option value="" selected disabled>-- Pilih Pesanan / Transfer Dikonfirmasi --
                                     </option>
-                                    @if (isset($approvedOrders))
-                                        @foreach ($approvedOrders as $order)
-                                            <option value="{{ $order->id }}" data-qty="{{ $order->quantity }}">
-                                                {{ ucwords($order->name) }} (Pesanan: {{ $order->quantity }}
-                                                {{ $order->unit }}) - Tgl:
-                                                {{ \Carbon\Carbon::parse($order->request_date)->format('d/m/Y') }}
-                                            </option>
-                                        @endforeach
+
+                                    {{-- KELOMPOK 1: DARI PESANAN (SUPPLIER) --}}
+                                    @if (isset($approvedOrders) && $approvedOrders->count() > 0)
+                                        <optgroup label="Dari Pesanan (Supplier)">
+                                            @foreach ($approvedOrders as $order)
+                                                <option value="order_{{ $order->id }}"
+                                                    data-qty="{{ $order->quantity }}">
+                                                    {{ ucwords($order->name) }} (Pesanan: {{ $order->quantity }}
+                                                    {{ $order->unit }})
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endif
+
+                                    {{-- KELOMPOK 2: DARI TRANSFER ANTAR PROYEK --}}
+                                    @if (isset($approvedTransfers) && $approvedTransfers->count() > 0)
+                                        <optgroup label="Dari Transfer (Antar Proyek)">
+                                            @foreach ($approvedTransfers as $transfer)
+                                                <option value="transfer_{{ $transfer->id }}"
+                                                    data-qty="{{ $transfer->quantity }}">
+                                                    {{ ucwords($transfer->material->name) }} (Transfer:
+                                                    {{ $transfer->quantity }} {{ $transfer->material->unit }}) - Dari:
+                                                    {{ $transfer->fromProject->name }}
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
                                     @endif
                                 </select>
                                 <div
@@ -173,8 +195,8 @@
                                 </div>
                             </div>
                             <p class="text-xs text-blue-600 mt-2 italic">
-                                <i class="fas fa-info-circle"></i> Sistem akan otomatis mencocokkan atau membuat Master
-                                Material baru berdasarkan nama pesanan.
+                                <i class="fas fa-info-circle"></i> Kuantitas akan terisi otomatis sesuai surat
+                                pesanan/transfer.
                             </p>
                         </div>
 
@@ -314,12 +336,13 @@
             document.getElementById(modalID).classList.toggle("hidden");
         }
 
-        // Script untuk mengisi kuantitas otomatis saat pesanan dipilih
-        document.getElementById('order_id').addEventListener('change', function() {
+        // Script untuk mengisi kuantitas otomatis saat pesanan/transfer dipilih
+        document.getElementById('reference_id').addEventListener('change', function() {
             let selectedOption = this.options[this.selectedIndex];
             let qty = selectedOption.getAttribute('data-qty');
 
             if (qty) {
+                // Mengisi input kuantitas secara otomatis
                 document.getElementById('quantity_input').value = qty;
             } else {
                 document.getElementById('quantity_input').value = '';
@@ -339,15 +362,13 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Berhasil!',
-                    text: "{{ session('success') }}",
+                    text: "{!! session('success') !!}",
                     confirmButtonColor: '#28a745'
                 });
             @endif
 
             // Jika ada error dari validasi input
             @if ($errors->any())
-                // Karena error, kita buka juga modalnya biar user bisa memperbaiki
-                // Pengecekan class list agar tidak terjadi toggle ganda jika reopen_modal juga aktif
                 if (document.getElementById('modalTambahBarangMasuk').classList.contains('hidden')) {
                     toggleModal('modalTambahBarangMasuk');
                 }
@@ -365,7 +386,7 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Oops...',
-                    text: "{{ session('error') }}",
+                    text: "{!! session('error') !!}",
                     confirmButtonColor: '#d33'
                 });
             @endif

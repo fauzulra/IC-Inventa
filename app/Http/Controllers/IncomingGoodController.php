@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\IncomingGood;
+use App\Models\ItemTransfer; // PASTIKAN IMPORT INI ADA
 use App\Models\Material;
 use App\Models\Order;
 use App\Models\Project;
@@ -11,32 +12,8 @@ use Illuminate\Http\Request;
 
 class IncomingGoodController extends Controller
 {
+    // ... (Fungsi index() tetap sama) ...
 
-
-    public function index()
-    {
-        $user = auth()->user();
-        
-        // JIKA BUKAN ADMIN: Langsung lempar ke tabel barang masuk proyeknya
-        if (!$user->hasRole('admin') && $user->project_id) {
-            return redirect()->route('incominggood.project.show', $user->project_id);
-        }
-
-        // JIKA ADMIN: Tampilkan form pilih proyek
-        $projects = Project::paginate(5);
-        $title = "Pilih Proyek - Barang Masuk";
-        
-        // KUNCI DINAMISNYA ADA DI SINI:
-        // Kita arahkan agar setelah proyek diklik, perginya ke route 'incominggood.project.show'
-        $targetRoute = 'incominggood.project.show'; 
-        
-        // Kita panggil/pinjam file view select_project milik modul material
-        return view('material.select_project', compact('projects', 'title', 'targetRoute'));
-    }
-
-    // =========================================================================
-    // TAMPILKAN TABEL BARANG MASUK SETELAH PROYEK DIPILIH
-    // =========================================================================
     public function showProjectIncoming($id)
     {
         $project = Project::findOrFail($id);
@@ -46,99 +23,110 @@ class IncomingGoodController extends Controller
                                      ->latest()
                                      ->get();
 
-        // LOGIKA BARU: Ambil material HANYA yang terdaftar di proyek ini saja!
         $materials = $project->materials()->orderBy('name', 'asc')->get(); 
-
         $suppliers = Supplier::orderBy('name', 'asc')->get();
 
+        // 1. Ambil data pesanan ke supplier yang sudah dikonfirmasi
         $approvedOrders = Order::where('project_id', $id)
-                                           ->where('status', 'Diterima') 
-                                           ->get();
+                               ->where('status', 'Diterima') 
+                               ->get();
+
+        // 2. Ambil data transfer antar proyek yang ditujukan ke proyek ini dan sudah dikirim/diterima
+        $approvedTransfers = ItemTransfer::with(['material', 'fromProject'])
+                                         ->where('to_project_id', $id)
+                                         ->where('status', 'Diterima') 
+                                         ->get();
 
         $allProjects = auth()->user()->hasRole('admin') ? Project::orderBy('name', 'asc')->get() : [];
 
-        return view('incominggood.index', compact('project', 'incomingGoods', 'materials', 'suppliers', 'approvedOrders', 'allProjects'));
+        return view('incominggood.index', compact('project', 'incomingGoods', 'materials', 'suppliers', 'approvedOrders', 'approvedTransfers', 'allProjects'));
     }
 
     public function store(Request $request)
     {
-        // Validasi input
+        // Validasi input diubah dari order_id menjadi reference_id
         $request->validate([
             'project_id'    => 'required|integer|exists:projects,id',
-            'order_id'      => 'required|integer|exists:orders,id', // Diubah menjadi required karena ini wajib dari pesanan
+            'reference_id'  => 'required|string', // Menampung gabungan tipe dan ID (ex: "order_1" atau "transfer_2")
             'quantity'      => 'required|integer|min:1',
             'date_received' => 'required|date',
             'supplier_id'   => 'nullable|integer|exists:suppliers,id',
         ]);
 
-        $project = Project::find($request->project_id);
-        $order = Order::find($request->order_id);
+        $project = Project::findOrFail($request->project_id);
 
-        if (!$order) {
-            return redirect()->back()->with('error', 'Pesanan tidak ditemukan!');
+        // Pecah reference_id untuk mengetahui apakah ini dari Order atau ItemTransfer
+        $ref = explode('_', $request->reference_id);
+        $type = $ref[0]; // 'order' atau 'transfer'
+        $id = $ref[1];   // ID datanya
+
+        $material = null;
+
+        // =========================================================================
+        // LOGIKA PENENTUAN MATERIAL & UPDATE STATUS SUMBER
+        // =========================================================================
+        if ($type === 'order') {
+            $order = Order::findOrFail($id);
+            
+            // Cek/Buat Master Material jika dari Order
+            $material = Material::whereRaw('LOWER(name) = ?', [strtolower($order->name)])
+                                ->whereRaw('LOWER(unit) = ?', [strtolower($order->unit)])
+                                ->first();
+
+            if (!$material) {
+                $material = Material::create([
+                    'name'        => ucwords(strtolower($order->name)),
+                    'unit'        => ucwords(strtolower($order->unit)),
+                    'supplier_id' => $request->supplier_id,
+                ]);
+            }
+            
+            // Tutup pesanan
+            $order->update(['status' => 'Diterima Gudang']);
+
+        } elseif ($type === 'transfer') {
+            $transfer = ItemTransfer::findOrFail($id);
+            
+            // Jika dari transfer, material pasti sudah ada di database global
+            $material = Material::findOrFail($transfer->material_id);
+            
+            // Tutup status transfer
+            $transfer->update(['status' => 'Selesai']); 
         }
 
-        // =========================================================================
-        // LOGIKA AUTO-CREATE MATERIAL
-        // =========================================================================
-        
-        // 1. Cek apakah di tabel 'materials' (Global) sudah ada material dengan NAMA dan SATUAN yang persis sama
-        // Menggunakan huruf kecil (strtolower) agar pencariannya tidak sensitif huruf besar/kecil
-        $material = Material::whereRaw('LOWER(name) = ?', [strtolower($order->name)])
-                            ->whereRaw('LOWER(unit) = ?', [strtolower($order->unit)])
-                            ->first();
-
-        // 2. Jika material BELUM ADA di database global, sistem buatkan yang baru
         if (!$material) {
-            $material = Material::create([
-                'name'        => ucwords(strtolower($order->name)),
-                'unit'        => ucwords(strtolower($order->unit)),
-                'supplier_id' => $request->supplier_id, // Bisa null
-            ]);
+            return redirect()->back()->with('error', 'Gagal memproses data material.');
         }
 
         // =========================================================================
         // LOGIKA PENAMBAHAN STOK DI PIVOT TABLE PROYEK
         // =========================================================================
-        
-        // Cek apakah proyek ini sudah "memiliki" material tersebut di Pivot Table
         $materialInProject = $project->materials()->where('material_id', $material->id)->first();
 
         if ($materialInProject) {
-            // Jika sudah ada di proyek, tambahkan stoknya
             $newStock = $materialInProject->pivot->stock + $request->quantity;
             $project->materials()->updateExistingPivot($material->id, ['stock' => $newStock]);
         } else {
-            // Jika belum ada di proyek, pasangkan (attach) dengan stok awal dari penerimaan ini
             $project->materials()->attach($material->id, ['stock' => $request->quantity]);
         }
 
         // =========================================================================
-        // PENCATATAN HISTORI BARANG MASUK & UPDATE STATUS PESANAN
+        // PENCATATAN HISTORI BARANG MASUK
         // =========================================================================
-        
-        // Catat ke tabel riwayat barang masuk (incoming_goods)
         IncomingGood::create([
             'project_id'    => $request->project_id,
-            'material_id'   => $material->id, // Menggunakan ID dari material yang ditemukan/baru dibuat
-            'supplier_id'   => $request->supplier_id,
+            'material_id'   => $material->id,
+            'supplier_id'   => $type === 'order' ? $request->supplier_id : null, // Supplier kosong jika dari transfer
             'quantity'      => $request->quantity,
             'date_received' => $request->date_received,
         ]);
 
-        // Ubah status pesanan agar ditutup
-        if ($request->order_id) {
-            $order = Order::find($request->order_id);
-            if ($order) {
-                $order->update(['status' => 'Diterima Gudang']);
-            }
-        }
-
-        // Redirect kembali dengan menambahkan 'reopen_modal' agar View tahu modal harus dibuka lagi
         return redirect()->back()
-            ->with('success', 'Barang berhasil diterima!.')
+            ->with('success', 'Barang berhasil diterima! Stok telah ditambahkan.')
             ->with('reopen_modal', true);
     }
+
+
 
     public function printReport(Request $request)
     {

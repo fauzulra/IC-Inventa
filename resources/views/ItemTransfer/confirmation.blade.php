@@ -199,6 +199,8 @@
 @endsection
 
 @section('script')
+
+
     <script>
         function openStatusModal(transferId, itemName) {
             document.getElementById('modalItemName').value = itemName;
@@ -209,6 +211,40 @@
         function closeStatusModal() {
             document.getElementById('modalKonfirmasiStatus').classList.add('hidden');
         }
+
+        // TANGKAP PESAN DARI CONTROLLER
+        document.addEventListener("DOMContentLoaded", function() {
+
+            // Tangkap pesan sukses
+            @if (session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: {!! json_encode(session('success')) !!},
+                    confirmButtonColor: '#28a745'
+                });
+            @endif
+
+            // Tangkap pesan Error (Termasuk dari Exception DB::rollBack)
+            @if (session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: {!! json_encode(session('error')) !!},
+                    confirmButtonColor: '#d33'
+                });
+            @endif
+
+            // Tangkap error validasi form
+            @if ($errors->any())
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Data Tidak Valid!',
+                    text: {!! json_encode($errors->first()) !!},
+                    confirmButtonColor: '#d33'
+                });
+            @endif
+        });
     </script>
     @include('layout.script')
 @endsection
