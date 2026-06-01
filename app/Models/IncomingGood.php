@@ -15,6 +15,7 @@ class IncomingGood extends Model
         'material_id',
         'supplier_id',
         'quantity',
+        'po_number',
         'date_received',
     ];
 

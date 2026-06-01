@@ -72,6 +72,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/material/order', [MaterialController::class, 'orderIndex'])->name('material.order');
     Route::get('/material/order/project/{id}', [MaterialController::class, 'showProjectOrders'])->name('material.order.show');
     Route::post('/material/order', [MaterialController::class, 'orderStore'])->name('material.order.store');
+    Route::put('/material/order/{id}', [App\Http\Controllers\MaterialController::class, 'orderUpdate'])->name('material.order.update');
+    Route::delete('/material/order/{id}', [App\Http\Controllers\MaterialController::class, 'orderDestroy'])->name('material.order.destroy');
 
     // 3. KONFIRMASI MATERIAL
     Route::get('/material/confirmation', [MaterialController::class, 'confirmationIndex'])->name('material.confirmation');

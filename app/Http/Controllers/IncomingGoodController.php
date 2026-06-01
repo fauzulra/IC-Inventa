@@ -12,8 +12,19 @@ use Illuminate\Http\Request;
 
 class IncomingGoodController extends Controller
 {
-    // ... (Fungsi index() tetap sama) ...
+     public function index()
+    {
+        $user = auth()->user();
+        if (!$user->hasRole('admin') && $user->project_id) {
+            return redirect()->route('incominggood.project.show', $user->project_id);
+        }
 
+        $projects = Project::paginate(5);
+        $title = "Pilih Proyek - Barang Masuk";
+        $targetRoute = 'incominggood.project.show';
+        return view('material.select_project', compact('projects', 'title', 'targetRoute'));
+
+    }
     public function showProjectIncoming($id)
     {
         $project = Project::findOrFail($id);
@@ -47,10 +58,11 @@ class IncomingGoodController extends Controller
         // Validasi input diubah dari order_id menjadi reference_id
         $request->validate([
             'project_id'    => 'required|integer|exists:projects,id',
-            'reference_id'  => 'required|string', // Menampung gabungan tipe dan ID (ex: "order_1" atau "transfer_2")
+            'reference_id'  => 'required|string',
             'quantity'      => 'required|integer|min:1',
             'date_received' => 'required|date',
             'supplier_id'   => 'nullable|integer|exists:suppliers,id',
+            'po_number'     => 'nullable|string|max:255', // <--- VALIDASI BARU
         ]);
 
         $project = Project::findOrFail($request->project_id);
@@ -110,17 +122,15 @@ class IncomingGoodController extends Controller
             $project->materials()->attach($material->id, ['stock' => $request->quantity]);
         }
 
-        // =========================================================================
-        // PENCATATAN HISTORI BARANG MASUK
-        // =========================================================================
         IncomingGood::create([
             'project_id'    => $request->project_id,
             'material_id'   => $material->id,
-            'supplier_id'   => $type === 'order' ? $request->supplier_id : null, // Supplier kosong jika dari transfer
+            'supplier_id'   => $request->supplier_id, // Ambil dari inputan dropdown
+            'po_number'     => $request->po_number,   // <--- SIMPAN PO NUMBER
             'quantity'      => $request->quantity,
             'date_received' => $request->date_received,
         ]);
-
+        
         return redirect()->back()
             ->with('success', 'Barang berhasil diterima! Stok telah ditambahkan.')
             ->with('reopen_modal', true);

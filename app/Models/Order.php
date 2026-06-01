@@ -18,7 +18,8 @@ class Order extends Model
         'quantity',
         'unit',
         'request_date',
-        'status'
+        'status',
+        'keterangan'
     ];
 
     public function user() 

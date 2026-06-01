@@ -105,18 +105,73 @@ class MaterialController extends Controller
 
     public function orderStore(Request $request)
     {
+        // Validasi input diubah menggunakan tanda bintang (*) karena formatnya array
+        $request->validate([
+            'project_id'       => 'required|integer|exists:projects,id',
+            'user_id'          => 'required|integer|exists:users,id',
+            'name.*'           => 'required|string|max:255',
+            'quantity.*'       => 'required|integer|min:1',
+            'unit.*'           => 'required|string|max:50',
+            'request_date.*'   => 'required|date',
+            'keterangan.*'     => 'nullable|string|max:255', // Validasi keterangan
+        ]);
+
+        // Looping semua pesanan yang dimasukkan (karena bisa tambah banyak baris sekaligus)
+        foreach ($request->name as $index => $materialName) {
+            Order::create([
+                'project_id'   => $request->project_id,
+                'user_id'      => $request->user_id,
+                'name'         => $materialName,
+                'quantity'     => $request->quantity[$index],
+                'unit'         => $request->unit[$index],
+                'request_date' => $request->request_date[$index],
+                'keterangan'   => $request->keterangan[$index] ?? null, // Simpan keterangan
+                'status'       => 'pending'
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Semua pesanan material berhasil ditambahkan!');
+    }
+
+    public function orderUpdate(Request $request, $id)
+    {
+        // Perhatikan ini BUKAN array (tidak pakai bintang *) karena diedit satu per satu
         $request->validate([
             'name'         => 'required|string|max:255',
             'quantity'     => 'required|integer|min:1',
             'unit'         => 'required|string|max:50',
             'request_date' => 'required|date',
-            'user_id'      => 'required|integer|exists:users,id',
-            'project_id'   => 'required|integer|exists:projects,id',
+            'keterangan'   => 'nullable|string|max:255',
         ]);
 
-        Order::create(array_merge($request->all(), ['status' => 'pending']));
+        $order = Order::findOrFail($id);
 
-        return redirect()->back()->with('success', 'Pesanan material berhasil diajukan!');
+        if (strtolower($order->status) !== 'pending') {
+            return redirect()->back()->with('error', 'Hanya pesanan berstatus pending yang bisa diedit.');
+        }
+
+        $order->update([
+            'name'         => $request->name,
+            'quantity'     => $request->quantity,
+            'unit'         => $request->unit,
+            'request_date' => $request->request_date,
+            'keterangan'   => $request->keterangan,
+        ]);
+
+        return redirect()->back()->with('success', 'Data pesanan berhasil diperbarui!');
+    }
+
+    public function orderDestroy($id)
+    {
+        $order = Order::findOrFail($id);
+
+        if (strtolower($order->status) !== 'pending') {
+            return redirect()->back()->with('error', 'Pesanan yang sudah diproses tidak bisa dibatalkan.');
+        }
+
+        $order->delete();
+
+        return redirect()->back()->with('success', 'Pesanan berhasil dibatalkan/dihapus!');
     }
 
     public function confirmationUpdate(Request $request, $id)
@@ -144,12 +199,14 @@ class MaterialController extends Controller
             'name'        => 'required|string|max:255',
             'unit'        => 'required|string|max:50',
             'stock'       => 'required|integer|min:0',
+            'keterangan'  => 'nullable|string|max:255', // <-- Tambahan validasi
         ]);
 
         $material = Material::create([
             'name'        => $request->name,
             'unit'        => $request->unit,
             'supplier_id' => $request->supplier_id,
+            'keterangan'  => $request->keterangan, // <-- Simpan ke database
         ]);
 
         $project = Project::find($request->project_id);

@@ -5,7 +5,6 @@
 @section('content')
     <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md border border-gray-200 mt-6">
 
-
         {{-- HEADER UNTUK LOGISTIK --}}
         @if (auth()->user()->hasRole('logistik'))
             <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
@@ -86,6 +85,7 @@
                         </th>
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Material</th>
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Kuantitas Masuk</th>
+                        <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Nomor PO</th>
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Tanggal Masuk</th>
                         <th class="border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700">Sumber / Pemasok</th>
                     </tr>
@@ -104,16 +104,20 @@
                             </td>
 
                             <td class="border border-gray-200 px-4 py-4">
+                                {{ $incoming->po_number ?? '-' }}
+                            </td>
+
+                            <td class="border border-gray-200 px-4 py-4">
                                 {{ \Carbon\Carbon::parse($incoming->date_received)->format('d/m/Y') }}
                             </td>
 
                             <td class="border border-gray-200 px-4 py-4">
-                                {{ $incoming->supplier ? $incoming->supplier->name : '-' }}
+                                {{ $incoming->supplier ? $incoming->supplier->name : 'Transfer Internal / Lainnya' }}
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="border border-gray-200 px-4 py-6 text-center text-gray-500">
+                            <td colspan="6" class="border border-gray-200 px-4 py-6 text-center text-gray-500">
                                 Belum ada data penerimaan barang di proyek ini.
                             </td>
                         </tr>
@@ -134,7 +138,6 @@
 
             <div
                 class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-100">
                     <div class="flex justify-between items-center">
                         <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">Input Penerimaan Barang</h3>
@@ -147,22 +150,16 @@
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
                     <form action="{{ route('incominggood.store') }}" method="POST">
                         @csrf
-
-                        <input type="hidden" name="project_id" value="{{ $project->id }}">
-
                         <input type="hidden" name="project_id" value="{{ $project->id }}">
 
                         <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                             <label class="block text-blue-800 text-sm font-bold mb-2">Berdasarkan Surat Pesanan /
                                 Transfer:</label>
                             <div class="relative">
-                                {{-- NAMA & ID INPUT DIUBAH MENJADI reference_id --}}
                                 <select name="reference_id" id="reference_id" required
                                     class="shadow appearance-none border border-blue-300 rounded w-full py-2 pl-3 pr-10 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
                                     <option value="" selected disabled>-- Pilih Pesanan / Transfer Dikonfirmasi --
                                     </option>
-
-                                    {{-- KELOMPOK 1: DARI PESANAN (SUPPLIER) --}}
                                     @if (isset($approvedOrders) && $approvedOrders->count() > 0)
                                         <optgroup label="Dari Pesanan (Supplier)">
                                             @foreach ($approvedOrders as $order)
@@ -174,8 +171,6 @@
                                             @endforeach
                                         </optgroup>
                                     @endif
-
-                                    {{-- KELOMPOK 2: DARI TRANSFER ANTAR PROYEK --}}
                                     @if (isset($approvedTransfers) && $approvedTransfers->count() > 0)
                                         <optgroup label="Dari Transfer (Antar Proyek)">
                                             @foreach ($approvedTransfers as $transfer)
@@ -194,10 +189,8 @@
                                     <i class="fas fa-chevron-down text-xs"></i>
                                 </div>
                             </div>
-                            <p class="text-xs text-blue-600 mt-2 italic">
-                                <i class="fas fa-info-circle"></i> Kuantitas akan terisi otomatis sesuai surat
-                                pesanan/transfer.
-                            </p>
+                            <p class="text-xs text-blue-600 mt-2 italic"><i class="fas fa-info-circle"></i> Kuantitas akan
+                                terisi otomatis sesuai surat pesanan/transfer.</p>
                         </div>
 
                         <div class="flex gap-4 mb-4">
@@ -214,12 +207,22 @@
                                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                             </div>
                         </div>
-                        {{-- <div class="mb-6">
+
+                        {{-- INPUT NOMOR PO BARU --}}
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Nomor PO (Opsional)</label>
+                            <input type="text" name="po_number" placeholder="Contoh: PO/2026/001..."
+                                value="{{ old('po_number') }}"
+                                class="shadow capitalize appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
+                        </div>
+
+                        {{-- DROPDOWN SUPPLIER DIBUKA KEMBALI --}}
+                        <div class="mb-6">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Sumber Barang (Pemasok)</label>
                             <div class="relative">
                                 <select name="supplier_id"
                                     class="shadow appearance-none border rounded w-full py-2 pl-3 pr-10 text-gray-700 leading-normal focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent bg-white">
-                                    <option value="" selected>-- Tidak Diketahui / Lainnya --</option>
+                                    <option value="" selected>-- Transfer Internal / Belum Diketahui --</option>
                                     @foreach ($suppliers as $supplier)
                                         <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
                                     @endforeach
@@ -229,17 +232,14 @@
                                     <i class="fas fa-chevron-down text-xs"></i>
                                 </div>
                             </div>
-                        </div> --}}
+                        </div>
 
                         <div class="flex flex-row-reverse">
                             <button type="submit"
-                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#FFB22C] text-base font-medium text-white hover:bg-orange-500 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
-                                Simpan Penerimaan
-                            </button>
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#FFB22C] text-base font-medium text-white hover:bg-orange-500 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Simpan
+                                Penerimaan</button>
                             <button type="button" onclick="toggleModal('modalTambahBarangMasuk')"
-                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                                Batal
-                            </button>
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
                         </div>
                     </form>
                 </div>
@@ -248,6 +248,7 @@
     </div>
 
     {{-- MODAL CETAK LAPORAN --}}
+    {{-- (Kode Modal Cetak tetap sama, tidak ada yang berubah di bagian ini) --}}
     <div id="modalCetakLaporan" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title"
         role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -256,24 +257,18 @@
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
             <div
                 class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-100">
                     <div class="flex justify-between items-center">
                         <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">Cetak Laporan Barang Masuk
                         </h3>
                         <button onclick="toggleModal('modalCetakLaporan')"
-                            class="text-gray-400 hover:text-gray-500 focus:outline-none">
-                            <i class="fas fa-times"></i>
-                        </button>
+                            class="text-gray-400 hover:text-gray-500 focus:outline-none"><i
+                                class="fas fa-times"></i></button>
                     </div>
                 </div>
-
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
-                    {{-- Form menggunakan GET dan target="_blank" agar buka di Tab Baru --}}
                     <form action="{{ route('incominggood.report') }}" method="GET" target="_blank">
-
                         @if (auth()->user()->hasRole('admin'))
-                            {{-- TAMPILAN ADMIN: Bisa pilih proyek --}}
                             <div class="mb-4">
                                 <label class="block text-gray-700 text-sm font-bold mb-2">Pilih Proyek</label>
                                 <select name="project_id"
@@ -281,23 +276,19 @@
                                     <option value="all">-- Semua Proyek --</option>
                                     @foreach ($allProjects as $proj)
                                         <option value="{{ $proj->id }}"
-                                            {{ $project->id == $proj->id ? 'selected' : '' }}>
-                                            {{ $proj->code }} - {{ $proj->name }}
-                                        </option>
+                                            {{ $project->id == $proj->id ? 'selected' : '' }}>{{ $proj->code }} -
+                                            {{ $proj->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                         @else
-                            {{-- TAMPILAN LOGISTIK/STAFF: Proyek terkunci --}}
                             <div class="mb-4">
                                 <label class="block text-gray-700 text-sm font-bold mb-2">Proyek</label>
                                 <input type="text" disabled value="{{ $project->name }}"
                                     class="shadow border rounded w-full py-2 px-3 text-gray-500 bg-gray-100 cursor-not-allowed">
-                                {{-- Kita tetap mengirim project_id di belakang layar meski controller sudah mem-bypass-nya --}}
                                 <input type="hidden" name="project_id" value="{{ $project->id }}">
                             </div>
                         @endif
-
                         <div class="flex gap-4 mb-6">
                             <div class="w-1/2">
                                 <label class="block text-gray-700 text-sm font-bold mb-2">Dari Tanggal</label>
@@ -312,16 +303,12 @@
                                     class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
                             </div>
                         </div>
-
                         <div class="flex flex-row-reverse mt-2">
                             <button type="submit" onclick="toggleModal('modalCetakLaporan')"
-                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
-                                <i class="fas fa-print mr-2 mt-1"></i> Cetak Laporan
-                            </button>
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"><i
+                                    class="fas fa-print mr-2 mt-1"></i> Cetak Laporan</button>
                             <button type="button" onclick="toggleModal('modalCetakLaporan')"
-                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                                Batal
-                            </button>
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
                         </div>
                     </form>
                 </div>
@@ -336,28 +323,21 @@
             document.getElementById(modalID).classList.toggle("hidden");
         }
 
-        // Script untuk mengisi kuantitas otomatis saat pesanan/transfer dipilih
         document.getElementById('reference_id').addEventListener('change', function() {
             let selectedOption = this.options[this.selectedIndex];
             let qty = selectedOption.getAttribute('data-qty');
-
             if (qty) {
-                // Mengisi input kuantitas secara otomatis
                 document.getElementById('quantity_input').value = qty;
             } else {
                 document.getElementById('quantity_input').value = '';
             }
         });
 
-        // TANGKAP PESAN SUCCESS & ERROR DARI CONTROLLER
         document.addEventListener("DOMContentLoaded", function() {
-
-            // JIKA MENERIMA SINYAL UNTUK MEMBUKA MODAL KEMBALI SETELAH SIMPAN
             @if (session('reopen_modal'))
                 toggleModal('modalTambahBarangMasuk');
             @endif
 
-            // Jika Berhasil Disimpan
             @if (session('success'))
                 Swal.fire({
                     icon: 'success',
@@ -367,12 +347,10 @@
                 });
             @endif
 
-            // Jika ada error dari validasi input
             @if ($errors->any())
                 if (document.getElementById('modalTambahBarangMasuk').classList.contains('hidden')) {
                     toggleModal('modalTambahBarangMasuk');
                 }
-
                 Swal.fire({
                     icon: 'error',
                     title: 'Gagal Menyimpan!',
@@ -381,7 +359,6 @@
                 });
             @endif
 
-            // Jika ada pesan error kustom
             @if (session('error'))
                 Swal.fire({
                     icon: 'error',
@@ -390,7 +367,6 @@
                     confirmButtonColor: '#d33'
                 });
             @endif
-
         });
     </script>
     @include('layout.script')
