@@ -62,7 +62,8 @@
                             <td class="border border-gray-200 px-4 py-1.5 text-center">
                                 @if (auth()->user()->hasRole('admin'))
                                     {{-- Bisa diklik Admin --}}
-                                    <button onclick="openStatusModal('{{ $project->name }}')"
+                                    <button
+                                        onclick="openStatusModal('{{ $project->id }}', '{{ addslashes($project->name) }}', '{{ strtolower($project->status) }}')"
                                         class="{{ $project->status === 'selesai' ? 'bg-green-500 hover:bg-green-600' : 'bg-orange-400 hover:bg-orange-500' }} text-white px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition transform hover:scale-105 shadow-sm">
                                         {{ ucfirst($project->status) }}
                                     </button>
@@ -183,7 +184,9 @@
                     </div>
                 </div>
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
-                    <form>
+                    <form id="updateStatusForm" method="POST">
+                        @csrf
+                        @method('PATCH')
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Nama Proyek</label>
                             <input type="text" id="statusProyekName" readonly
@@ -194,16 +197,16 @@
                             <div class="space-y-3">
                                 <label
                                     class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-orange-50 transition group">
-                                    <input type="radio" name="status_proyek" value="Berjalan"
-                                        class="h-4 w-4 text-orange-400 focus:ring-orange-400 border-gray-300">
+                                    <input type="radio" id="radio_berjalan" name="status_proyek" value="berjalan"
+                                        required class="h-4 w-4 text-orange-400 focus:ring-orange-400 border-gray-300">
                                     <span class="ml-3 flex-1 block font-medium text-gray-700">Berjalan</span>
                                     <span
                                         class="bg-orange-400 text-white px-3 py-1.5 rounded-md text-xs font-semibold">Aktif</span>
                                 </label>
                                 <label
                                     class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-green-50 transition group">
-                                    <input type="radio" name="status_proyek" value="Selesai"
-                                        class="h-4 w-4 text-green-500 focus:ring-green-500 border-gray-300">
+                                    <input type="radio" id="radio_selesai" name="status_proyek" value="selesai"
+                                        required class="h-4 w-4 text-green-500 focus:ring-green-500 border-gray-300">
                                     <span class="ml-3 flex-1 block font-medium text-gray-700">Selesai</span>
                                     <span
                                         class="bg-green-500 text-white px-3 py-1.5 rounded-md text-xs font-semibold">Selesai</span>
@@ -341,6 +344,22 @@
             let form = document.getElementById('deleteProjectForm');
             form.action = "{{ url('project') }}/" + id;
             toggleModal('modalDeleteProyek');
+        }
+
+        function openStatusModal(id, proyekName, currentStatus) {
+
+            let form = document.getElementById('updateStatusForm');
+            form.action = "{{ url('project') }}/" + id + "/status";
+
+            document.getElementById('statusProyekName').value = proyekName;
+
+            if (currentStatus === 'selesai') {
+                document.getElementById('radio_selesai').checked = true;
+            } else {
+                document.getElementById('radio_berjalan').checked = true;
+            }
+
+            toggleModal('modalUpdateStatusProyek');
         }
     </script>
     @include('layout.script')
