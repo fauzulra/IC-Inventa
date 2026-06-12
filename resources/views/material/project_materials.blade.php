@@ -6,7 +6,7 @@
     <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md border border-gray-200 mt-6">
 
         @if (auth()->user()->hasRole('admin'))
-            <div class="flex flex-col md:flex-row justify-between mb-6">
+            <div class="flex flex-col md:flex-row justify-between mb-20 gap-4">
                 <div class="flex justify-start">
                     <h2 class="text-xl font-bold text-gray-800">Daftar Material - {{ $project->name }}</h2>
                 </div>
@@ -18,10 +18,10 @@
                 </div>
             </div>
 
-            <button onclick="toggleModal('modalTambahMaterial')"
+            {{-- <button onclick="toggleModal('modalTambahMaterial')"
                 class="bg-[#FFB22C] hover:bg-orange-500 text-white font-medium text-sm py-3 px-4 rounded-md mb-6 flex items-center gap-2 transition duration-200">
                 <i class="fas fa-plus"></i> Tambah Material
-            </button>
+            </button> --}}
         @else
             <div class="flex flex-col md:flex-row justify-between items-center mb-20 gap-4">
                 <div class="flex justify-start w-full md:w-auto">

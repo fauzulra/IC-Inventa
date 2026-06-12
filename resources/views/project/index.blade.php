@@ -80,7 +80,7 @@
                                 @if (auth()->user()->hasRole('admin'))
                                     <div class="flex justify-center gap-2">
                                         <button
-                                            onclick="openEditModal('{{ $project->id }}', '{{ $project->name }}', '{{ $project->location }}', '{{ $project->logistics_contact }}')"
+                                            onclick="openEditModal('{{ $project->id }}', '{{ addslashes($project->name) }}', '{{ addslashes($project->location) }}', '{{ addslashes($project->logistics_contact) }}')"
                                             class="text-orange-400 border border-orange-400 hover:bg-orange-50 rounded p-1 w-8 h-8 flex items-center justify-center transition">
                                             <i class="fas fa-edit"></i>
                                         </button>
@@ -328,16 +328,18 @@
 
         function openEditModal(id, name, location, contact) {
             let form = document.getElementById('editProjectForm');
-            form.action = `/project/${id}`;
+            form.action = "{{ url('project') }}/" + id;
+
             document.getElementById('edit_name').value = name;
             document.getElementById('edit_location').value = location;
             document.getElementById('edit_logistics_contact').value = contact;
+
             toggleModal('modalEditProyek');
         }
 
         function openDeleteModal(id) {
             let form = document.getElementById('deleteProjectForm');
-            form.action = `/project/${id}`;
+            form.action = "{{ url('project') }}/" + id;
             toggleModal('modalDeleteProyek');
         }
     </script>
