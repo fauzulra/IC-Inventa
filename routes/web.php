@@ -67,6 +67,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/material', [MaterialController::class, 'store'])->name('material.store');
     Route::put('/material/{id}', [MaterialController::class, 'update'])->name('material.update');
     Route::delete('/material/{id}', [MaterialController::class, 'destroy'])->name('material.destroy');
+    Route::patch('/project/{id}/status', [ProjectController::class, 'updateStatus'])->name('project.update-status');
 
     // 2. PEMESANAN (ORDER)
     Route::get('/material/order', [MaterialController::class, 'orderIndex'])->name('material.order');

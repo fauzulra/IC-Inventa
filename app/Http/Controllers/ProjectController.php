@@ -78,6 +78,25 @@ class ProjectController extends Controller
         return redirect()->back()->with('success', 'Data Proyek berhasil diperbarui!');
     }
 
+    public function updateStatus(Request $request, $id)
+{
+    // 1. Validasi Input Status
+    $request->validate([
+        'status_proyek' => 'required|in:berjalan,selesai',
+    ]);
+
+    // 2. Cari Data Proyek berdasarkan ID (sebagai angka)
+    $project = Project::findOrFail($id);
+
+    // 3. Update Status
+    $project->update([
+        'status' => $request->status_proyek,
+    ]);
+
+    // 4. Redirect kembali dengan pesan sukses
+    return redirect()->back()->with('success', 'Status Proyek berhasil diperbarui!');
+}
+
     public function destroy($id)
     {
         // 1. Cari Data Proyek dan Hapus
