@@ -258,39 +258,23 @@
                             <input type="text" id="edit_location" name="location" required
                                 class="capitalize shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent">
                         </div>
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Logistik (Nama & Kontak)</label>
-                            <div class="relative">
-                                <select id="edit_logistics_contact" name="logistics_contact" required
-                                    class="shadow appearance-none border rounded w-full py-2 pl-3 pr-10 text-gray-700 leading-normal focus:outline-none focus:ring-2 focus:ring-[#FFB22C] focus:border-transparent bg-white">
-                                    <option value="" disabled>Pilih Logistik...</option>
-                                    <option value="Seno – 0813 6421 9203">Seno – 0813 6421 9203</option>
-                                    <option value="Ryan Sinaga – 0858 3735 0411">Ryan Sinaga – 0858 3735 0411</option>
-                                    <option value="Dhuha – 0895 6036 81241">Dhuha – 0895 6036 81241</option>
-                                    <option value="Retno Diaz – 0813 6411 9665">Retno Diaz – 0813 6411 9665</option>
-                                </select>
-                                <div
-                                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
-                                    <i class="fas fa-chevron-down text-xs"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex flex-row-reverse">
-                            <button type="submit"
-                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#FFB22C] text-base font-medium text-white hover:bg-orange-500 sm:ml-3 sm:w-auto sm:text-sm">Update</button>
-                            <button type="button" onclick="toggleModal('modalEditProyek')"
-                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
-                        </div>
-                    </form>
                 </div>
+                <div class="flex flex-row-reverse">
+                    <button type="submit"
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#FFB22C] text-base font-medium text-white hover:bg-orange-500 sm:ml-3 sm:w-auto sm:text-sm">Update</button>
+                    <button type="button" onclick="toggleModal('modalEditProyek')"
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
+                </div>
+                </form>
             </div>
         </div>
     </div>
+    </div>
 
     {{-- MODAL DELETE PROYEK --}}
-    <div id="modalDeleteProyek" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title"
+    <div id="modalDeleteProyek" class="fixed inset-0 z-50 hidden overflow-y-auto " aria-labelledby="modal-title"
         role="dialog" aria-modal="true">
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="flex items-end justify-center min-h-screen p-5  pb-20 text-center sm:block sm:p-0">
             <div onclick="toggleModal('modalDeleteProyek')"
                 class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
@@ -335,7 +319,6 @@
 
             document.getElementById('edit_name').value = name;
             document.getElementById('edit_location').value = location;
-            document.getElementById('edit_logistics_contact').value = contact;
 
             toggleModal('modalEditProyek');
         }
